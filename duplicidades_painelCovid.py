@@ -15,6 +15,7 @@ from datetime import datetime, date
 #%% Importando os dados
 #Importando somente as variáveis que serão utilizadas para deixar o processamento mais leve
 colunas = ['Record_Id','nomecompletoPaciente', 'dataNascimentoFull','mae', 'sexo', 'cpf', 'dataPrimeiroSintomas', 'testeRT_PCR', 'Reinfecção', 'Laboratorio']
+#Não esqueça de mudar o nome do banco de dados!! Deve substituir o nome 'DadosQualidadeCovid19.csv'
 dados = pd.read_csv('DadosQualidadeCovid19.csv',sep=";", usecols=colunas, encoding='latin')
 
 #%% Duplicando a variável 'dataNascimentoFull' a fim de juntar uma das colunas com o 'nomecompletoPaciente' para diminuir a incidência de homônimos
