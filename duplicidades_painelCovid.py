@@ -95,7 +95,7 @@ for letra in alfabeto:
         nomes_tratados = [utils.default_process(org) for org in nomesF] 
         for (k, duplicidades) in enumerate(nomes_tratados):
             nomes_tratados[k] = None
-            match = process.extractOne(duplicidades, nomes_tratados, processor=None, score_cutoff=93)
+            match = process.extractOne(duplicidades, nomes_tratados, processor=None, score_cutoff=94)
             nomes_tratados[k] = duplicidades
             if match:
                 duplicidade.append(list(nomesF)[match[2]])
@@ -120,6 +120,31 @@ duplicidadesFinal = juntos.dropna(subset=['Duplicidades'])
 duplicidadesFinal = duplicidadesFinal.set_index('Record_Id')
 duplicidadesFinal = duplicidadesFinal.drop(['sexo', 'nome_e_datanasc', 'faixas_etarias'], 1)
 
+#%% Removendo duplicidades com 2 PCR e > 90 dias de diferença entre os primeiros sintomas
+# Transformando dataPrimeiroSintomas em data
+duplicidadesFinal['dataPrimeiroSintomas'] = duplicidadesFinal['dataPrimeiroSintomas'].apply(pd.to_datetime, format = "%d/%m/%Y", errors='coerce')
+
+duplicidadesFinal['id'] = 0
+duplicidadesFinal['reinf'] = 0
+
+cont = 0
+for k in range(0, duplicidadesFinal.shape[0], 2):
+    duplicidadesFinal['id'][k] = cont
+    duplicidadesFinal['id'][k+1] = cont
+    cont +=1
+
+# Cria um loop que vai percorrer os valores na coluna id
+for i in duplicidadesFinal['id']:
+    # Cria uma lista com os dois valores 
+    teste_pcr = duplicidadesFinal.loc[duplicidadesFinal['id']==i]['testeRT_PCR'].tolist()
+    if teste_pcr[0] == 'sim' and teste_pcr[1] == 'sim':
+        primeiros_sintomas = duplicidadesFinal.loc[duplicidadesFinal['id']==i]['dataPrimeiroSintomas'].tolist()
+        if (primeiros_sintomas[0]  - primeiros_sintomas[1]).days >= 90 or (primeiros_sintomas[1] - primeiros_sintomas[0] ).days >= 90:
+            duplicidadesFinal.loc[duplicidadesFinal['id']==i, 'reinf'] = 1
+#%% Tirando os que têm reinf = 1, que seriam as pessoas reinfectadas e tirando a coluna 'id' e 'reinf' para  deixar o banco mais limpo
+duplicidadesFinal = duplicidadesFinal.loc[duplicidadesFinal['reinf']!=1]
+duplicidadesFinal.drop(['id', 'reinf'], axis='columns', inplace=True)
+
 #%% Salvando o banco final em um aquivo CSV
 duplicidadesFinal.to_csv('DuplicidadesPainel_FEMININO.csv',sep=';', encoding='latin', decimal=',')
 
@@ -136,7 +161,7 @@ for letra in alfabeto:
         nomes_tratados = [utils.default_process(org) for org in nomesM] 
         for (k, duplicidades) in enumerate(nomes_tratados):
             nomes_tratados[k] = None
-            match = process.extractOne(duplicidades, nomes_tratados, processor=None, score_cutoff=93)
+            match = process.extractOne(duplicidades, nomes_tratados, processor=None, score_cutoff=94)
             nomes_tratados[k] = duplicidades
             if match:
                 duplicidade.append(list(nomesM)[match[2]])
@@ -160,6 +185,31 @@ juntos = dados_masculino.set_index('nomestratados').join(duplosM.set_index('nome
 duplicidadesFinal_M = juntos.dropna(subset=['Duplicidades'])
 duplicidadesFinal_M = duplicidadesFinal_M.set_index('Record_Id')
 duplicidadesFinal_M = duplicidadesFinal_M.drop(['sexo', 'nome_e_datanasc', 'faixas_etarias'], 1)
+
+#%% Removendo duplicidades com 2 PCR e > 90 dias de diferença entre os primeiros sintomas
+# Transformando dataPrimeiroSintomas em data
+duplicidadesFinal_M['dataPrimeiroSintomas'] = duplicidadesFinal_M['dataPrimeiroSintomas'].apply(pd.to_datetime, format = "%d/%m/%Y", errors='coerce')
+
+duplicidadesFinal_M['id'] = 0
+duplicidadesFinal_M['reinf'] = 0
+
+cont = 0
+for k in range(0, duplicidadesFinal_M.shape[0], 2):
+    duplicidadesFinal_M['id'][k] = cont
+    duplicidadesFinal_M['id'][k+1] = cont
+    cont +=1
+
+# Cria um loop que vai percorrer os valores na coluna id
+for i in duplicidadesFinal_M['id']:
+    # Cria uma lista com os dois valores 
+    teste_pcr = duplicidadesFinal_M.loc[duplicidadesFinal_M['id']==i]['testeRT_PCR'].tolist()
+    if teste_pcr[0] == 'sim' and teste_pcr[1] == 'sim':
+        primeiros_sintomas = duplicidadesFinal_M.loc[duplicidadesFinal_M['id']==i]['dataPrimeiroSintomas'].tolist()
+        if (primeiros_sintomas[0]  - primeiros_sintomas[1]).days >= 90 or (primeiros_sintomas[1] - primeiros_sintomas[0] ).days >= 90:
+            duplicidadesFinal_M.loc[duplicidadesFinal_M['id']==i, 'reinf'] = 1
+#%% Tirando os que têm reinf = 1, que seriam as pessoas reinfectadas e tirando a coluna 'id' e 'reinf' para  deixar o banco mais limpo
+duplicidadesFinal_M = duplicidadesFinal_M.loc[duplicidadesFinal_M['reinf']!=1]
+duplicidadesFinal_M.drop(['id', 'reinf'], axis='columns', inplace=True)
 
 #%% Salvando o banco final em um aquivo CSV
 duplicidadesFinal_M.to_csv('DuplicidadesPainel_MASCULINO.csv',sep=';', encoding='latin', decimal=',')
