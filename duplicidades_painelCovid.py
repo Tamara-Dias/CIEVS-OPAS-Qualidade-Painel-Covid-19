@@ -1,5 +1,5 @@
 #Primeiro é necessário instalar os pacotes, isto só deve ser feito uma vez na máquina de uso. 
-#Remova o '#' das linhas de instalação caso seja necessário instalar os pacotes pela primeira vez na máquina.
+#Remova o '#' das linhas de instalação caso seja necessário instalar os pacotes pela primeira vez na máquina. 
 #%%
 #pip install numpy 
 #pip install pandas
