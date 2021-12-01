@@ -1,7 +1,6 @@
 ---
 title: "Automatização da Matriz de Risco Covid-19"
 author: "Centro de informações estratégicas em vigilância em saúde - CIEVS"
-date: format(Sys.Date(), "%d/%m/%Y")
 output:
   pdf_document:
     keep_tex: false
