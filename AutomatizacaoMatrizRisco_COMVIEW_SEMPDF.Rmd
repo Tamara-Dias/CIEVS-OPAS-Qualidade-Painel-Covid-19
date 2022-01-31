@@ -163,7 +163,7 @@ painel <- data.table(painel)
 # > Transformando datas e criando semanas epidemiológicas ---------------------------------------------------
 
 # Transformando data de primeiros sintomas e óbitos em datas
-painel[,dataSin := as.Date(dataPrimeiroSintomas, "%d/%m/%Y")]
+painel[,dataSin := as.Date(dataPrimeiroSintomas, "%Y-%m-%d")]
 painel[,dataObt := as.Date(dataObito, "%d/%m/%Y")]
 
 # Criando a semana epidemiológica
@@ -179,44 +179,158 @@ anoHoje <- format(hoje,"%Y") #ano do calculo da matriz
 painelDataObt <- as_tbl_time(painel, index = dataObt) #transformando a data novamente
 DataOrdenadaObt <- painelDataObt[order(painelDataObt$dataObt),] #ordenando a data
 painelFiltroAnoObt <- filter_time(DataOrdenadaObt, ~ anoHoje) #filtrando somente ano de 'anoHoje'
+```
 
+
+```{r include=FALSE}
 # Definindo semanas epidemiológicas com base na semana de cálculo da matriz
 semanaVariacoesObt <- painelFiltroAnoObt %>% filter(semana_epid_obitos==(semanaEpiMatriz-2) | semana_epid_obitos==(semanaEpiMatriz-4))
 regioesObt <- table(semanaVariacoesObt$Regiao, semanaVariacoesObt$semana_epid_obitos)
+```
 
 
+```{r include=FALSE}
 # > Calculando variações de óbitos das regiões ----------------------------
 
-# Penultima semana
-central_obt_penul <- regioesObt[2,2]
-centroSul_obt_penul <- regioesObt[3,2]
-leste_obt_penul <- regioesObt[4,2]
-norte_obt_penul <- regioesObt[5,2]
-oeste_obt_penul <- regioesObt[6,2]
-sudoeste_obt_penul <- regioesObt[7,2]
-sul_obt_penul <- regioesObt[8,2]
+regcentral_obt <- regioesObt[grep("Região Central", rownames(regioesObt)), ]
+regcentrosul_obt <- regioesObt[grep("Região Centro Sul", rownames(regioesObt)), ]
+regleste_obt <- regioesObt[grep("Região Leste", rownames(regioesObt)), ]
+regnorte_obt <- regioesObt[grep("Região Norte", rownames(regioesObt)), ]
+regoeste_obt <- regioesObt[grep("Região Oeste", rownames(regioesObt)), ]
+regsudoeste_obt <- regioesObt[grep("Região Sudoeste", rownames(regioesObt)), ]
+regsul_obt <- regioesObt[grep("Região Sul", rownames(regioesObt)), ]
 total_obt_penul <- sum(regioesObt[,2])
+```
 
+
+```{r include=FALSE}
+# Penultima semana
+central_obt_penul <- if (class(regcentral_obt) == "true"){
+  central_obt_penul = 0
+} else central_obt_penul = regcentral_obt[2]
+
+centroSul_obt_penul <- if (class(regcentrosul_obt) == "true"){
+  centroSul_obt_penul = 0
+} else centroSul_obt_penul = regcentrosul_obt[2]
+
+leste_obt_penul <- if (class(regleste_obt) == "true"){
+  leste_obt_penul = 0
+} else leste_obt_penul = regleste_obt[2]
+
+norte_obt_penul <- if (class(regnorte_obt) == "true"){
+  norte_obt_penul = 0
+} else norte_obt_penul = regnorte_obt[2]
+
+oeste_obt_penul <- if (class(regoeste_obt) == "true"){
+  oeste_obt_penul = 0
+} else oeste_obt_penul = regoeste_obt[2]
+
+sudoeste_obt_penul <- if (class(regsudoeste_obt) == "true"){
+  sudoeste_obt_penul = 0
+} else sudoeste_obt_penul = regsudoeste_obt[2]
+
+sul_obt_penul <- if (class(regsul_obt) == "true"){
+  sul_obt_penul = 0
+} else sul_obt_penul = regsul_obt[2]
+
+total_obt_penul <- sum(regioesObt[,2])
+```
+
+
+```{r include=FALSE}
 # Antipenultima semana
-central_obt_anti <- regioesObt[2,1]
-centroSul_obt_anti <- regioesObt[3,1]
-leste_obt_anti <- regioesObt[4,1]
-norte_obt_anti <- regioesObt[5,1]
-oeste_obt_anti <- regioesObt[6,1]
-sudoeste_obt_anti <- regioesObt[7,1]
-sul_obt_anti <- regioesObt[8,1]
-total_obt_anti <- sum(regioesObt[,1])
+central_obt_anti <- if (class(regcentral_obt) == "true"){
+  central_obt_anti = 0
+} else central_obt_anti = regcentral_obt[1]
 
+centroSul_obt_anti <- if (class(regcentrosul_obt) == "true"){
+  centroSul_obt_anti = 0
+} else centroSul_obt_anti = regcentrosul_obt[1]
+
+leste_obt_anti <- if (class(regleste_obt) == "true"){
+  leste_obt_anti = 0
+} else leste_obt_anti = regleste_obt[1]
+
+norte_obt_anti <- if (class(regnorte_obt) == "true"){
+  norte_obt_anti = 0
+} else norte_obt_anti = regnorte_obt[1]
+
+oeste_obt_anti <- if (class(regoeste_obt) == "true"){
+  oeste_obt_anti = 0
+} else oeste_obt_anti = regoeste_obt[1]
+
+sudoeste_obt_anti <- if (class(regsudoeste_obt) == "true"){
+  sudoeste_obt_anti = 0
+} else sudoeste_obt_anti = regsudoeste_obt[1]
+
+sul_obt_anti <- if (class(regsul_obt) == "true"){
+  sul_obt_anti = 0
+} else sul_obt_anti = regsul_obt[1]
+
+total_obt_anti <- sum(regioesObt[,1])
+```
+
+```{r include=FALSE}
 # Variações
-var_central_obt <- round(((central_obt_penul-central_obt_anti)/central_obt_anti)*100, 0)
-var_centroSul_obt <- round(((centroSul_obt_penul-centroSul_obt_anti)/centroSul_obt_anti)*100, 0)
-var_leste_obt <- round(((leste_obt_penul-leste_obt_anti)/leste_obt_anti)*100, 0)
-var_norte_obt <- round(((norte_obt_penul-norte_obt_anti)/norte_obt_anti)*100, 0)
-var_oeste_obt <- round(((oeste_obt_penul-oeste_obt_anti)/oeste_obt_anti)*100, 0)
-var_sudoeste_obt <- round(((sudoeste_obt_penul-sudoeste_obt_anti)/sudoeste_obt_anti)*100, 0)
-var_sul_obt <- round(((sul_obt_penul-sul_obt_anti)/sul_obt_anti)*100, 0)
+var_central_obt <- c()
+if(class(regcentral_obt) == "table") {
+  var_central_obt = -9999
+} else if (regcentral_obt[1] == 0) {
+  var_central_obt = regcentral_obt[2]*100
+} else {
+  var_central_obt = ((central_obt_penul-central_obt_anti)/central_obt_anti)*100
+}
+var_centroSul_obt <- c()
+if(class(regcentrosul_obt) == "table") {
+  var_centroSul_obt = -9999
+} else if (regcentrosul_obt[1] == 0) {
+  var_centroSul_obt = regcentrosul_obt[2]*100
+} else {
+  var_centroSul_obt = ((centroSul_obt_penul-centroSul_obt_anti)/centroSul_obt_anti)*100
+}
+var_leste_obt <- c()
+if(class(regleste_obt) == "table") {
+  var_leste_obt = -9999
+} else if (regleste_obt[1] == 0) {
+  var_leste_obt = regleste_obt[2]*100
+} else {
+  var_leste_obt = ((leste_obt_penul-leste_obt_anti)/leste_obt_anti)*100
+}
+var_norte_obt <- c()
+if(class(regnorte_obt) == "table") {
+  var_norte_obt = -9999
+} else if (regnorte_obt[1] == 0) {
+  var_norte_obt = regnorte_obt[2]*100
+} else {
+  var_norte_obt = ((norte_obt_penul-norte_obt_anti)/norte_obt_anti)*100
+}
+var_oeste_obt <- c()
+if(class(regoeste_obt) == "table") {
+  var_oeste_obt = -9999
+} else if (regoeste_obt[1] == 0) {
+  var_oeste_obt = regoeste_obt[2]*100
+} else {
+  var_oeste_obt = ((oeste_obt_penul-oeste_obt_anti)/oeste_obt_anti)*100
+}
+var_sudoeste_obt <- c()
+if(class(regsudoeste_obt) == "table") {
+  var_sudoeste_obt = -9999
+} else if (regsudoeste_obt[1] == 0) {
+  var_sudoeste_obt = regsudoeste_obt[2]*100
+} else {
+  var_sudoeste_obt = ((sudoeste_obt_penul-sudoeste_obt_anti)/sudoeste_obt_anti)*100
+}
+var_sul_obt <- c()
+if(class(regsul_obt) == "table") {
+  var_sul_obt = -9999
+} else if (regsul_obt[1] == 0) {
+  var_sul_obt = regsul_obt[2]*100
+} else {
+  var_sul_obt = ((sul_obt_penul-sul_obt_anti)/sul_obt_anti)*100
+}
 var_total_obt <- round(((total_obt_penul-total_obt_anti)/total_obt_anti)*100, 0)
 ```
+
 
 
 ```{r include=FALSE}
@@ -226,44 +340,157 @@ var_total_obt <- round(((total_obt_penul-total_obt_anti)/total_obt_anti)*100, 0)
 painelData <- as_tbl_time(painel, index = dataSin) #transformando a data novamente
 DataOrdenada <- painelData[order(painelData$dataSin),] #ordenando a data
 painelFiltroAno <- filter_time(DataOrdenada, ~ anoHoje) #filtrando somente ano de 'anoHoje'
+```
 
+
+```{r include=FALSE}
 # Definindo semanas epidemiológicas com base na semana de cálculo da matriz
 semanaVariacoes <- painelFiltroAno %>% filter(semana_epid_sintomas==(semanaEpiMatriz-2) | semana_epid_sintomas==(semanaEpiMatriz-4))
 regioesCasos <- table(semanaVariacoes$Regiao, semanaVariacoes$semana_epid_sintomas)
-
-# Calculando variações de casos das regiões
-
-# Penultima semana
-central_penul <- regioesCasos[2,2]
-centroSul_penul <- regioesCasos[3,2]
-leste_penul <- regioesCasos[4,2]
-norte_penul <- regioesCasos[5,2]
-oeste_penul <- regioesCasos[6,2]
-sudoeste_penul <- regioesCasos[7,2]
-sul_penul <- regioesCasos[8,2]
-total_penul <- sum(regioesCasos[,2])
-
-# Antipenultima semana
-central_anti <- regioesCasos[2,1]
-centroSul_anti <- regioesCasos[3,1]
-leste_anti <- regioesCasos[4,1]
-norte_anti <- regioesCasos[5,1]
-oeste_anti <- regioesCasos[6,1]
-sudoeste_anti <- regioesCasos[7,1]
-sul_anti <- regioesCasos[8,1]
-total_anti <- sum(regioesCasos[,1])
-
-# Variações
-var_central <- round(((central_penul-central_anti)/central_anti)*100, 0)
-var_centroSul <- round(((centroSul_penul-centroSul_anti)/centroSul_anti)*100, 0)
-var_leste <- round(((leste_penul-leste_anti)/leste_anti)*100, 0)
-var_norte <- round(((norte_penul-norte_anti)/norte_anti)*100, 0)
-var_oeste <- round(((oeste_penul-oeste_anti)/oeste_anti)*100, 0)
-var_sudoeste <- round(((sudoeste_penul-sudoeste_anti)/sudoeste_anti)*100, 0)
-var_sul <- round(((sul_penul-sul_anti)/sul_anti)*100, 0)
-var_total <- round(((total_penul-total_anti)/total_anti)*100, 0)
 ```
 
+
+```{r include=FALSE}
+# > Calculando variações de casos das regiões ----------------------------
+
+regcentral <- regioesCasos[grep("Região Central", rownames(regioesCasos)), ]
+regcentrosul <- regioesCasos[grep("Região Centro Sul", rownames(regioesCasos)), ]
+regleste <- regioesCasos[grep("Região Leste", rownames(regioesCasos)), ]
+regnorte <- regioesCasos[grep("Região Norte", rownames(regioesCasos)), ]
+regoeste <- regioesCasos[grep("Região Oeste", rownames(regioesCasos)), ]
+regsudoeste <- regioesCasos[grep("Região Sudoeste", rownames(regioesCasos)), ]
+regsul <- regioesCasos[grep("Região Sul", rownames(regioesCasos)), ]
+total_penul <- sum(regioesCasos[,2])
+```
+
+
+```{r include=FALSE}
+# Penultima semana
+central_penul <- if (class(regcentral) == "true"){
+  central_penul = 0
+} else central_penul = regcentral[2]
+
+centroSul_penul <- if (class(regcentrosul) == "true"){
+  centroSul_penul = 0
+} else centroSul_penul = regcentrosul[2]
+
+leste_penul <- if (class(regleste) == "true"){
+  leste_penul = 0
+} else leste_penul = regleste[2]
+
+norte_penul <- if (class(regnorte) == "true"){
+  norte_penul = 0
+} else norte_penul = regnorte[2]
+
+oeste_penul <- if (class(regoeste) == "true"){
+  oeste_penul = 0
+} else oeste_penul = regoeste[2]
+
+sudoeste_penul <- if (class(regsudoeste) == "true"){
+  sudoeste_penul = 0
+} else sudoeste_penul = regsudoeste[2]
+
+sul_penul <- if (class(regsul) == "true"){
+  sul_penul = 0
+} else sul_penul = regsul[2]
+
+total_penul <- sum(regioesCasos[,2])
+```
+
+
+```{r include=FALSE}
+# Antipenultima semana
+central_anti <- if (class(regcentral) == "true"){
+  central_anti = 0
+} else central_anti = regcentral[1]
+
+centroSul_anti <- if (class(regcentrosul) == "true"){
+  centroSul_anti = 0
+} else centroSul_anti = regcentrosul[1]
+
+leste_anti <- if (class(regleste) == "true"){
+  leste_anti = 0
+} else leste_anti = regleste[1]
+
+norte_anti <- if (class(regnorte) == "true"){
+  norte_anti = 0
+} else norte_anti = regnorte[1]
+
+oeste_anti <- if (class(regoeste) == "true"){
+  oeste_anti = 0
+} else oeste_anti = regoeste[1]
+
+sudoeste_anti <- if (class(regsudoeste) == "true"){
+  sudoeste_anti = 0
+} else sudoeste_anti = regsudoeste[1]
+
+sul_anti <- if (class(regsul) == "true"){
+  sul_anti = 0
+} else sul_anti = regsul[1]
+
+total_anti <- sum(regioesCasos[,1])
+```
+
+```{r include=FALSE}
+# Variações
+var_central <- c()
+if(class(regcentral) == "table") {
+  var_central = -9999
+} else if (regcentral[1] == 0) {
+  var_central = regcentral[2]*100
+} else {
+  var_central = ((central_penul-central_anti)/central_anti)*100
+}
+var_centroSul <- c()
+if(class(regcentrosul) == "table") {
+  var_centroSul = -9999
+} else if (regcentrosul[1] == 0) {
+  var_centroSul = regcentrosul[2]*100
+} else {
+  var_centroSul = ((centroSul_penul-centroSul_anti)/centroSul_anti)*100
+}
+var_leste <- c()
+if(class(regleste) == "table") {
+  var_leste = -9999
+} else if (regleste[1] == 0) {
+  var_leste = regleste[2]*100
+} else {
+  var_leste = ((leste_penul-leste_anti)/leste_anti)*100
+}
+var_norte <- c()
+if(class(regnorte) == "table") {
+  var_norte = -9999
+} else if (regnorte[1] == 0) {
+  var_norte = regnorte[2]*100
+} else {
+  var_norte = ((norte_penul-norte_anti)/norte_anti)*100
+}
+var_oeste <- c()
+if(class(regoeste) == "table") {
+  var_oeste = -9999
+} else if (regoeste[1] == 0) {
+  var_oeste = regoeste[2]*100
+} else {
+  var_oeste = ((oeste_penul-oeste_anti)/oeste_anti)*100
+}
+var_sudoeste <- c()
+if(class(regsudoeste) == "table") {
+  var_sudoeste = -9999
+} else if (regsudoeste[1] == 0) {
+  var_sudoeste = regsudoeste[2]*100
+} else {
+  var_sudoeste = ((sudoeste_penul-sudoeste_anti)/sudoeste_anti)*100
+}
+var_sul <- c()
+if(class(regsul) == "table") {
+  var_sul = -9999
+} else if (regsul[1] == 0) {
+  var_sul = regsul[2]*100
+} else {
+  var_sul = ((sul_penul-sul_anti)/sul_anti)*100
+}
+var_total <- round(((total_penul-total_anti)/total_anti)*100, 0)
+```
 
 ```{r include=FALSE}
 # ATIVIDADE ---------------------------------------------------------------
@@ -291,7 +518,9 @@ ativos_oeste7 <- casosAtivos7[1,5]
 ativos_sudoeste7 <- casosAtivos7[1,6]
 ativos_sul7 <- casosAtivos7[1,7]
 ativos_DF7 <- casosAtivos7[1,8]
+```
 
+```{r include=FALSE}
 # > Calculando média móvel ------------------------------------------------
 
 fim_MM <- hoje-7
@@ -606,8 +835,10 @@ estimateSul <-estimate_R(
   config = configSul)
 
 RTSul <- round(tail(estimateSul$R$`Mean(R)`,7)[7],2)
+```
 
 
+```{r include=FALSE}
 # > Cálculo razão de casos ativos e atividade ---------------------------------------------------
 
 razao_ativos_central <- round(ativos_central/ativos_central7,2)
@@ -651,7 +882,10 @@ if (leitos_UTI >= 90) {
 } else {
   pontosI1 = 0
 }
+```
 
+
+```{r include=FALSE}
 # > Taxa de ocupação de Leitos Clínicos COVID-19 --------------------------
 leitos_UTI_clinicos <- round((sum(UCI_Publica_Ocup,UCI_Publica_Bloq,UCI_Publica_Direc,ENF_Publica_Ocup,ENF_Publica_Bloq,UCI_Publica_Direc)/sum(UCI_Publica_Total,ENF_Publica_Total))*100,2)
 
@@ -667,7 +901,10 @@ if (leitos_UTI_clinicos >= 85) {
 } else {
   pontosI2 = 0
 }
+```
 
+
+```{r include=FALSE}
 # > Previsão de Esgotamento de Leitos UTI ---------------------------------
 pontosI3 <- c()
 if (dias_esg >= 0 & dias_esg <= 6) {
@@ -681,7 +918,10 @@ if (dias_esg >= 0 & dias_esg <= 6) {
 } else {
   pontosI3 = 0
 }
+```
 
+
+```{r include=FALSE}
 # *Epidemiológico ---------------------------------------------------------
 
 # > Variação do N° de Óbitos por COVID-19 nos últimos 14 dias -------------
@@ -697,7 +937,10 @@ if (var_total_obt >= 20) {
 } else {
   pontosI4 = 0
 }
+```
 
+
+```{r include=FALSE}
 # > Variação do N° de casos por COVID-19 nos últimos 21 dias --------------
 pontosI5 <- c()
 if (var_total >= 20) {
@@ -711,7 +954,10 @@ if (var_total >= 20) {
 } else {
   pontosI5 = 0
 }
+```
 
+
+```{r include=FALSE}
 # > Atividade -------------------------------------------------------------
 pontosI6 <- c()
 if (atividade_DF > 2) {
@@ -725,8 +971,10 @@ if (atividade_DF > 2) {
 } else {
   pontosI6 = 0
 }
+```
 
 
+```{r include=FALSE}
 # *Pontos totais da matriz ------------------------------------------------
 pontosGerais <- sum(pontosI1,pontosI2,pontosI3,pontosI4,pontosI5,pontosI6)
 
@@ -742,8 +990,10 @@ if (pontosGerais == 0) {
 } else {
   Risco = 'Risco Muito Alto'
 }
+```
 
 
+```{r include=FALSE}
 # *Pontos das Regiões de Saúde --------------------------------------------
 # > Pontos da variação de óbitos por região de saúde ----------------------
 # Central
@@ -843,8 +1093,10 @@ if (var_sul_obt >= 20) {
 } else {
   PontosSulObt = 0
 }
+```
 
 
+```{r include=FALSE}
 # > Pontos da variação de casos por região de saúde -----------------------
 # Central
 PontosCentral <- c()
@@ -943,7 +1195,10 @@ if (var_sul >= 20) {
 } else {
   PontosSul = 0
 }
+```
 
+
+```{r include=FALSE}
 # > Atividade das Regiões de Saúde ----------------------------------------
 # Central
 PontosAtvCentral <- c()
@@ -1042,7 +1297,10 @@ if (atividade_sul > 2) {
 } else {
   PontosAtvSul = 0
 }
+```
 
+
+```{r include=FALSE}
 # *Pontos Grau de Risco ---------------------------------------------------
 grauCentral <- sum(pontosI1, pontosI2, pontosI3, PontosCentralObt, PontosCentral, PontosAtvCentral)
 grauCentroSul <- sum(pontosI1, pontosI2, pontosI3, PontosCentroSulObt, PontosCentroSul, PontosAtvCentroSul)
@@ -1212,19 +1470,67 @@ Em reunião conjunta no dia 31/05/21 optou-se por fazer a análise de óbitos co
 
 ```{r echo=FALSE}
 # > Variação Óbitos -------------------------------------------------------
-varObitos <- matrix(c(central_obt_anti, centroSul_obt_anti, leste_obt_anti, norte_obt_anti, oeste_obt_anti, sudoeste_obt_anti, sul_obt_anti, total_obt_anti, central_obt_penul, centroSul_obt_penul, leste_obt_penul, norte_obt_penul, oeste_obt_penul, sudoeste_obt_penul, sul_obt_penul, total_obt_penul, paste0(var_central_obt,'%'),  paste0(var_centroSul_obt,'%'),  paste0(var_leste_obt,'%'),  paste0(var_norte_obt,'%'),  paste0(var_oeste_obt,'%'),  paste0(var_sudoeste_obt,'%'),  paste0(var_sul_obt,'%'),  paste0(var_total_obt,'%')), ncol=3, byrow = F)
+varObitos <- matrix(c(
+  (if(is.na(central_obt_anti)){0} else {central_obt_anti}), 
+  (if(is.na(centroSul_obt_anti)){0} else {centroSul_obt_anti}), 
+  (if(is.na(leste_obt_anti)){0} else {leste_obt_anti}), 
+  (if(is.na(norte_obt_anti)){0} else {norte_obt_anti}), 
+  (if(is.na(oeste_obt_anti)){0} else {oeste_obt_anti}), 
+  (if(is.na(sudoeste_obt_anti)){0} else {sudoeste_obt_anti}), 
+  (if(is.na(sul_obt_anti)){0} else {sul_obt_anti}), total_obt_anti, 
+  (if(is.na(central_obt_penul)){0} else {central_obt_penul}), 
+  (if(is.na(centroSul_obt_penul)){0} else {centroSul_obt_penul}), 
+  (if(is.na(leste_obt_penul)){0} else {leste_obt_penul}), 
+  (if(is.na(norte_obt_penul)){0} else {norte_obt_penul}), 
+  (if(is.na(oeste_obt_penul)){0} else {oeste_obt_penul}), 
+  (if(is.na(sudoeste_obt_penul)){0} else {sudoeste_obt_penul}), 
+  (if(is.na(sul_obt_penul)){0} else {sul_obt_penul}), total_obt_penul, 
+  paste0(round((if(var_central_obt == -9999){0} else {var_central_obt}),0),'%'), 
+  paste0(round((if(var_centroSul_obt == -9999){0} else {var_centroSul_obt}),0),'%'), 
+  paste0(round((if(var_leste_obt == -9999){0} else {var_leste_obt}),0),'%'), 
+  paste0(round((if(var_norte_obt == -9999){0} else {var_norte_obt}),0),'%'), 
+  paste0(round((if(var_oeste_obt == -9999){0} else {var_oeste_obt}),0),'%'), 
+  paste0(round((if(var_sudoeste_obt == -9999){0} else {var_sudoeste_obt}),0),'%'),  
+  paste0(round((if(var_sul_obt == -9999){0} else {var_sul_obt}),0),'%'),  
+  paste0(round(var_total_obt,0),'%')), ncol=3, byrow = F)
+
 colnames(varObitos) <- c(paste0('2 Semanas anteriores: ', semanaEpiMatriz-4),	paste0('Penúltima Semana: ', semanaEpiMatriz-2), 'Variação')
 rownames(varObitos) <- c('REGIÃO CENTRAL','REGIÃO CENTRO SUL','REGIÃO LESTE','REGIÃO NORTE','REGIÃO OESTE', 'REGIÃO SUDOESTE','REGIÃO SUL', 'Total Óbitos Notif. DF') 
-kable(varObitos, caption = paste0('Óbitos - Semana epidemiológica de referência: ', semanaEpiMatriz), align=rep('c', 3)) 
+
+kable(varObitos, caption = paste0('Óbitos - Semana epidemiológica de referência: ', semanaEpiMatriz), align=rep('c', 3))
 ```
 
 ### Variação de casos
 
 ```{r echo=FALSE}
 # > Variação Casos --------------------------------------------------------
-varCasos <- matrix(c(central_anti, centroSul_anti, leste_anti, norte_anti, oeste_anti, sudoeste_anti, sul_anti, total_anti, central_penul, centroSul_penul, leste_penul, norte_penul, oeste_penul, sudoeste_penul, sul_penul, total_penul, paste0(var_central,'%'),  paste0(var_centroSul,'%'),  paste0(var_leste,'%'),  paste0(var_norte,'%'),  paste0(var_oeste,'%'),  paste0(var_sudoeste,'%'),  paste0(var_sul,'%'),  paste0(var_total,'%')), ncol=3, byrow = F)
+varCasos <- matrix(c(
+  (if(is.na(central_anti)){0} else {central_anti}), 
+  (if(is.na(centroSul_anti)){0} else {centroSul_anti}), 
+  (if(is.na(leste_anti)){0} else {leste_anti}), 
+  (if(is.na(norte_anti)){0} else {norte_anti}), 
+  (if(is.na(oeste_anti)){0} else {oeste_anti}), 
+  (if(is.na(sudoeste_anti)){0} else {sudoeste_anti}), 
+  (if(is.na(sul_anti)){0} else {sul_anti}), total_anti, 
+  (if(is.na(central_penul)){0} else {central_penul}), 
+  (if(is.na(centroSul_penul)){0} else {centroSul_penul}), 
+  (if(is.na(leste_penul)){0} else {leste_penul}), 
+  (if(is.na(norte_penul)){0} else {norte_penul}), 
+  (if(is.na(oeste_penul)){0} else {oeste_penul}), 
+  (if(is.na(sudoeste_penul)){0} else {sudoeste_penul}), 
+  (if(is.na(sul_penul)){0} else {sul_penul}), total_penul, 
+  paste0(round((if(var_central == -9999){0} else {var_central}),0),'%'), 
+  paste0(round((if(var_centroSul == -9999){0} else {var_centroSul}),0),'%'), 
+  paste0(round((if(var_leste == -9999){0} else {var_leste}),0),'%'), 
+  paste0(round((if(var_norte == -9999){0} else {var_norte}),0),'%'), 
+  paste0(round((if(var_oeste == -9999){0} else {var_oeste}),0),'%'), 
+  paste0(round((if(var_sudoeste == -9999){0} else {var_sudoeste}),0),'%'),  
+  paste0(round((if(var_sul == -9999){0} else {var_sul}),0),'%'),  
+  paste0(round(var_total,0),'%')), ncol=3, byrow = F)
+
 colnames(varCasos) <- c(paste0('2 Semanas anteriores: ', semanaEpiMatriz-4),	paste0('Penúltima Semana: ', semanaEpiMatriz-2), 'Variação')
-rownames(varCasos) <- c('REGIÃO CENTRAL','REGIÃO CENTRO SUL','REGIÃO LESTE','REGIÃO NORTE','REGIÃO OESTE', 'REGIÃO SUDOESTE','REGIÃO SUL', 'Total Óbitos Notif. DF') 
+rownames(varCasos) <- c('REGIÃO CENTRAL','REGIÃO CENTRO SUL','REGIÃO LESTE','REGIÃO NORTE','REGIÃO OESTE', 'REGIÃO SUDOESTE','REGIÃO SUL', 'Total Óbitos Notif. DF')
+
 kable(varCasos, caption = paste0('Casos - Semana epidemiológica de referência: ', semanaEpiMatriz), align=rep('c', 3))
 ```
 
@@ -1271,32 +1577,69 @@ webshot(html1, paste0('Imagens_Matriz/', hoje, " Tabela 1 - Classificacao DF.png
 
 #### Indicadores que compõem a classificação de risco do DF.
 
-```{r, echo=F, fig.align="center", out.width = "70%", out.height= "70%"}
+```{r, echo=F, fig.align="center", out.width = "100%", out.height= "100%"}
 # Indicadores
-tabelaRisco <- matrix(c('Taxa de ocupação de Leitos UTI COVID-19',paste0(leitos_UTI,'%'), pontosI1, 
-                        'Taxa de ocupação de Leitos Clínicos COVID-19',paste0(leitos_UTI_clinicos,'%'), pontosI2,
-                        'Previsão de Esgotamento de Leitos UTI',dias_esg, pontosI3,
-                        'Variação do N° de Óbitos por COVID-19 nos últimos 14 dias',paste0(var_total_obt,'%'), pontosI4,
-                        'Variação do N° de casos por COVID-19 nos últimos 14 dias',paste0(var_total,'%'), pontosI5,
-                        'Atividade',atividade_DF, pontosI6), ncol=3, byrow = T)
+tabelaRisco <- data.frame(matrix(c("", paste0(leitos_UTI,'%'), pontosI1, 
+                             paste0(leitos_UTI_clinicos,'%'), pontosI2,
+                             dias_esg, pontosI3,
+                             paste0(var_total_obt,'%'), pontosI4,
+                             paste0(var_total,'%'), pontosI5,
+                             atividade_DF, pontosI6), ncol=13))
 
-colnames(tabelaRisco) <- c('Indicadores', paste0('DF ', DFhoje), 'Pontos')
+sketch = htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2,  ' '),
+      th(colspan = 2, style = "border-right: solid 2px; border-top: solid 2px;", 'Taxa de ocupação de Leitos UTI COVID-19'),
+      th(colspan = 2, style = "border-right: solid 2px; border-top: solid 2px;", 'Taxa de ocupação de Leitos Clínicos COVID-19'),
+      th(colspan = 2, style = "border-right: solid 2px; border-top: solid 2px;", 'Previsão de Esgotamento de Leitos UTI'),
+      th(colspan = 2, style = "border-right: solid 2px; border-top: solid 2px;", 'Variação do N° de Óbitos por COVID-19 nos últimos 14 dias'),
+      th(colspan = 2, style = "border-right: solid 2px; border-top: solid 2px;", 'Variação do N° de casos por COVID-19 nos últimos 14 dias'),
+      th(colspan = 2, style = "border-top: solid 2px;", 'Atividade')
+    ),
+    tr(
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th(style = "border-right: solid 2px;", "Pontos"),
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th(style = "border-right: solid 2px;", "Pontos"),
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th(style = "border-right: solid 2px;", "Pontos"),
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th(style = "border-right: solid 2px;", "Pontos"),
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th(style = "border-right: solid 2px;", "Pontos"),
+      th(paste0('DF ', "(", DFhoje, ")")),
+      th("Pontos")
+    )
+  )
+))
 
-tabela2 <- datatable(tabelaRisco, width = 450, rownames = FALSE, 
-                     options = list(lengthChange = FALSE, dom = 't',
-                                    columnDefs = list(list(className = 'dt-center', targets = 1:2)), pageLength = 7, 
-                                    columnDefs = list(list(width = '100px', targets = c(0,1))), ordering = F)) %>% 
-  formatStyle(#`border-right` = "solid 2px",
-    colnames(tabelaRisco)[2],colnames(tabelaRisco)[3],
-    backgroundColor = styleEqual(c(0,1:9,10:18,19:30,31:40), c('yellowgreen',rep('yellow', 9),rep('orange', 9), rep('orangered',12) ,rep('mediumpurple',10))))
 
+tabela2 <- datatable(tabelaRisco, container = sketch, rownames = FALSE, 
+          options = list(lengthChange = FALSE, dom = 't',
+                         columnDefs = list(list(className = 'dt-center', targets = 1:12)), 
+                         columnDefs = list(list(targets = 3, visible = FALSE)), ordering = F)) %>% 
+formatStyle(colnames(tabelaRisco)[2],colnames(tabelaRisco)[3],
+              backgroundColor = styleEqual(c(0, 3, 6, 9, 12), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>% 
+  formatStyle(colnames(tabelaRisco)[4],colnames(tabelaRisco)[5],
+              backgroundColor = styleEqual(c(0, 2, 4, 6, 8), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>%
+  formatStyle(colnames(tabelaRisco)[6],colnames(tabelaRisco)[7],
+              backgroundColor = styleEqual(c(0, 1, 2, 3, 4), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>%
+  formatStyle(colnames(tabelaRisco)[8],colnames(tabelaRisco)[9],
+              backgroundColor = styleEqual(c(0, 1, 2, 6, 8), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>%
+  formatStyle(colnames(tabelaRisco)[10],colnames(tabelaRisco)[11],
+              backgroundColor = styleEqual(c(0, 1, 2, 3, 4), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>%
+  formatStyle(colnames(tabelaRisco)[12],colnames(tabelaRisco)[13],
+              backgroundColor = styleEqual(c(0, 1, 2, 3, 4), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple'))) %>%
+  formatStyle(c(3, 5, 7, 9, 11), `border-right` = "solid 2px")
 
 html2 <- "tabela2.html"
 saveWidget(tabela2, html2)
-webshot(html2, paste0('Imagens_Matriz/', hoje, " Tabela 2 - Indicadores DF.png"), cliprect = c(45, 30, 470, 348), zoom = 2)
-
+webshot(html2, paste0('Imagens_Matriz/', hoje, " Tabela 2 - Indicadores DF.png"), cliprect = c(28, 77, 1205, 215), zoom = 2)
 ```
 
+\newpage
 ## Matriz do DF e Regiões de Saúde
 
 #### Indicadores do Eixo 2 - Cenário epidemiológico da variação de óbitos de 14 dias das Regiões de Saúde.
@@ -1309,13 +1652,13 @@ regioesSaude <- c("Região Central", "Região Centro Sul", "Região Leste", "Reg
 
 sketch = htmltools::withTags(table(class = 'display', thead(tr(th(rowspan = 2, 'Região de Saúde'),th(colspan = 2, 'Variação do n° de óbitos de covid-19 nos últimos 14 dias')),tr(lapply(rep(c('Resultado', 'Pontos'), 1), th)))))
 
-tabelaE2RS <- matrix(c("Região Central", paste0(var_central_obt, "%"), PontosCentralObt, var_central_obt,
-                       "Região Centro Sul", paste0(var_centroSul_obt, "%"), PontosCentroSulObt, var_centroSul_obt,
-                       "Região Leste", paste0(var_leste_obt, "%"), PontosLesteObt, var_leste_obt,
-                       "Região Norte", paste0(var_norte_obt, "%"), PontosNorteObt, var_norte_obt,
-                       "Região Oeste", paste0(var_oeste_obt, "%"), PontosOesteObt, var_oeste_obt,
-                       "Região Sudoeste", paste0(var_sudoeste_obt, "%"), PontosSudoesteObt, var_sudoeste_obt,
-                       "Região Sul", paste0(var_sul_obt, "%"), PontosSulObt, var_sul_obt,
+tabelaE2RS <- matrix(c("Região Central", paste0(round((if(var_central_obt == -9999){0} else {var_central_obt}),0),'%'), PontosCentralObt, var_central_obt,
+                       "Região Centro Sul", paste0(round((if(var_centroSul_obt == -9999){0} else {var_centroSul_obt}),0),'%'), PontosCentroSulObt, var_centroSul_obt,
+                       "Região Leste",paste0(round((if(var_leste_obt == -9999){0} else {var_leste_obt}),0),'%'), PontosLesteObt, var_leste_obt,
+                       "Região Norte", paste0(round((if(var_norte_obt == -9999){0} else {var_norte_obt}),0),'%'), PontosNorteObt, var_norte_obt,
+                       "Região Oeste", paste0(round((if(var_oeste_obt == -9999){0} else {var_oeste_obt}),0),'%'), PontosOesteObt, var_oeste_obt,
+                       "Região Sudoeste", paste0(round((if(var_sudoeste_obt == -9999){0} else {var_sudoeste_obt}),0),'%'), PontosSudoesteObt, var_sudoeste_obt,
+                       "Região Sul", paste0(round((if(var_sul_obt == -9999){0} else {var_sul_obt}),0),'%'), PontosSulObt, var_sul_obt,
                        "Distrito Federal", paste0(var_total_obt, "%"), pontosI4, var_total_obt), ncol=4, byrow = T)
 
 colnames(tabelaE2RS) <- c('Regiões de Saúde', 'Resultado', 'Pontos', 'Teste')
@@ -1326,8 +1669,8 @@ tabela3 <- datatable(tabelaE2RS[ , c(1, 2:4)], width = 550, container = sketch, 
                                     columnDefs = list(list(className = 'dt-center', targets = 1:2)), pageLength = 8,
                                     columnDefs = list(list(targets = 3, visible = FALSE)),
                                     columnDefs = list(list(width = '90px', targets = c(0,1,3))), ordering = F)) %>%
-  formatStyle(colnames(tabelaE2RS)[2],colnames(tabelaE2RS)[4],
-              backgroundColor = styleEqual(c(-500:-19, -20:-4, -5:4, 5:19, 20:500), c(rep('yellowgreen', 482), rep('yellow', 17), rep('orange', 10), rep('orangered',15), rep('mediumpurple',481))))
+  formatStyle(colnames(tabelaE2RS)[2],colnames(tabelaE2RS)[3],
+                      backgroundColor = styleEqual(c(0, 1, 2, 6, 8), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple')))
 
 html3 <- "tabela3.html"
 saveWidget(tabela3, html3)
@@ -1340,13 +1683,13 @@ webshot(html3, paste0('Imagens_Matriz/', hoje, " Tabela 3 - Eixo 2 - Var obitos.
 # * Eixo 2 - Cenário Epidemiológico - Variação de casos 21 dias -----------
 sketch = htmltools::withTags(table(class = 'display', thead(tr(th(rowspan = 2, 'Região de Saúde'),th(colspan = 2, 'Variação do n° de casos de covid-19 nos últimos 21 dias')),tr(lapply(rep(c('Resultado', 'Pontos'), 1), th)))))
 
-tabelaE2RSCasos <- matrix(c("Região Central", paste0(var_central, "%"), PontosCentral, var_central,
-                            "Região Centro Sul", paste0(var_centroSul, "%"), PontosCentroSul, var_centroSul,
-                            "Região Leste", paste0(var_leste, "%"), PontosLeste, var_leste,
-                            "Região Norte", paste0(var_norte, "%"), PontosNorte, var_norte,
-                            "Região Oeste", paste0(var_oeste, "%"), PontosOeste, var_oeste,
-                            "Região Sudoeste", paste0(var_sudoeste, "%"), PontosSudoeste, var_sudoeste,
-                            "Região Sul", paste0(var_sul, "%"), PontosSul, var_sul,
+tabelaE2RSCasos <- matrix(c("Região Central", paste0(round((if(var_central == -9999){0} else {var_central}),0),'%'), PontosCentral, var_central,
+                            "Região Centro Sul", paste0(round((if(var_centroSul == -9999){0} else {var_centroSul}),0),'%'), PontosCentroSul, var_centroSul,
+                            "Região Leste", paste0(round((if(var_leste == -9999){0} else {var_leste}),0),'%'), PontosLeste, var_leste,
+                            "Região Norte", paste0(round((if(var_norte == -9999){0} else {var_norte}),0),'%'), PontosNorte, var_norte,
+                            "Região Oeste", paste0(round((if(var_oeste == -9999){0} else {var_oeste}),0),'%'), PontosOeste, var_oeste,
+                            "Região Sudoeste", paste0(round((if(var_sudoeste == -9999){0} else {var_sudoeste}),0),'%'), PontosSudoeste, var_sudoeste,
+                            "Região Sul", paste0(round((if(var_sul == -9999){0} else {var_sul}),0),'%'), PontosSul, var_sul,
                             "Distrito Federal", paste0(var_total, "%"), pontosI5, var_total), ncol=4, byrow = T)
 
 colnames(tabelaE2RSCasos) <- c('Regiões de Saúde', 'Resultado', 'Pontos', 'Teste')
@@ -1358,8 +1701,8 @@ tabela4 <- datatable(tabelaE2RSCasos[ , c(1, 2:4)], width = 540, container = ske
                                     pageLength = 8,
                                     columnDefs = list(list(targets = 3, visible = FALSE)),
                                     columnDefs = list(list(width = 90, targets = c(0,1,2))), ordering = F)) %>% 
-  formatStyle(colnames(tabelaE2RSCasos)[2],colnames(tabelaE2RSCasos)[4],
-              backgroundColor = styleEqual(c(-500:-19, -20:-4, -5:4, 5:19, 20:500), c(rep('yellowgreen', 482), rep('yellow', 17), rep('orange', 10), rep('orangered',15), rep('mediumpurple',481))))
+  formatStyle(colnames(tabelaE2RSCasos)[2],colnames(tabelaE2RSCasos)[3],
+                      backgroundColor = styleEqual(c(0, 1, 2, 3, 4), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple')))
 
 html4 <- "tabela4.html"
 saveWidget(tabela4, html4)
@@ -1393,8 +1736,8 @@ tabela5 <- datatable(tabelaE2RSAtv[ , c(1, 2:4)], width = 450, container = sketc
                                     pageLength = 8,
                                     columnDefs = list(list(targets = 3, visible = FALSE)),
                                     columnDefs = list(list(width = '80px', targets = c(0,1,3))), ordering = F)) %>% 
-  formatStyle(colnames(tabelaE2RSAtv)[2],colnames(tabelaE2RSAtv)[4],
-              backgroundColor = styleEqual(c(seq(-5, 0.9, by=0.1), 1, seq(1, 1.4, by=0.1), seq(1.5, 1.9, by=0.1), seq(2, 5, by=0.1)), c(rep('yellowgreen', 60), 'yellow', rep('orange', 5), rep('orangered', 5), rep('mediumpurple',31))))
+  formatStyle(colnames(tabelaE2RSAtv)[2],colnames(tabelaE2RSAtv)[3],
+              backgroundColor = styleEqual(c(0, 1, 2, 3, 4), c('yellowgreen', 'yellow', 'orange', 'orangered','mediumpurple')))
 
 html5 <- "tabela5.html"
 saveWidget(tabela5, html5)
@@ -1432,6 +1775,11 @@ html6 <- "tabela6.html"
 saveWidget(tabela6, html6)
 webshot(html6, paste0('Imagens_Matriz/', hoje, " Tabela 6 - Eixo 2 - Grau de Risco.png"), cliprect = c(45, 30, 470, 365), zoom = 2) 
 ```
+
+
+
+
+
 
 
 
