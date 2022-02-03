@@ -1,5 +1,5 @@
 
-# AutomatizaÁ„o RAs de vacinados do DF ------------------------------------
+# Automatiza√ß√£o RAs de vacinados do DF ------------------------------------
 
 rm(list=ls())
 if (!require(pacman)) install.packages("pacman")
@@ -40,25 +40,25 @@ dados_df <- dados_df %>%
          paciente_endereco_bairro = str_replace_all(paciente_endereco_bairro , "^\\s{0,}AP\\s{0,}[21]*\\s{0,}$|^\\s{0,}APT\\s{0,}[21]*\\s{0,}$", ""),
          paciente_endereco_bairro = str_replace_all(paciente_endereco_bairro , "^\\s{0,}APTO\\s{0,}[0-9]*\\s{0,}$", ""),
          paciente_endereco_bairro = str_replace_all(paciente_endereco_bairro , "^\\s{0,}[0-9]*\\s{0,}$", ""),
-         paciente_endereco_bairro =chartr("¡¬…»¿‘ŒÕ√’”⁄«", "AAEEAOIIAOOUC", paciente_endereco_bairro))
+         paciente_endereco_bairro =chartr("√Å√Ç√â√à√Ä√î√é√ç√É√ï√ì√ö√á", "AAEEAOIIAOOUC", paciente_endereco_bairro))
          
 
 # Mutates por RA ----------------------------------------------------------
 
 # > SOL NASCENTE ----------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("SOL\\s{0,}NASCENTE|POR\\s{0,}DO|SOL.* N|CEI.*\\s{0,}SOL|POL\\s{0,}DO|PO\\s{0,}DO|POR\\s{0,}SO|SO\\s{0,}NAS|SIL\\s{0,}NAS|SIL\\s{0,}NAS",paciente_endereco_bairro) & !grepl("ISOLADAS|CONDOMINIO SO",paciente_endereco_bairro), "SOL NASCENTE/P‘R DO SOL",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("SOL\\s{0,}NASCENTE|POR\\s{0,}DO|SOL.* N|CEI.*\\s{0,}SOL|POL\\s{0,}DO|PO\\s{0,}DO|POR\\s{0,}SO|SO\\s{0,}NAS|SIL\\s{0,}NAS|SIL\\s{0,}NAS",paciente_endereco_bairro) & !grepl("ISOLADAS|CONDOMINIO SO",paciente_endereco_bairro), "SOL NASCENTE/P√îR DO SOL",paciente_endereco_bairro))
 
-sol <- dados_df %>% filter(bairro_correto == "SOL NASCENTE/P‘R DO SOL")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SOL NASCENTE/P‘R DO SOL")
+sol <- dados_df %>% filter(bairro_correto == "SOL NASCENTE/P√îR DO SOL")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SOL NASCENTE/P√îR DO SOL")
 
 
-# > CEIL¬NDIA ----------------------------------------------------------
+# > CEIL√ÇNDIA ----------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("CEILANDIA|C\\s{0,}EI.* N|CE.*\\s{0,}N|ILANDIA SUL|QUARIR|C\\s{0,}EI.* S|C\\s{0,}NORTE|C\\s{0,}SUL|C MNORTE|CEULAND|SEILAN|CWILAN|CXEIL\\s{0}SUL|CEDILANDIA|CEIALANDIA|CEIALNDIA|CEIANDIA|CEIILANDIA|CELANDIA|CELIANDIA|CELILANDIA|CELILANIDA|CERANDIA|CEWILANDIA|CIEILANDIA|CIELANDIA|CILANDIA|CLEILANDIA|CPILANDIA|CREILANDIA|CRILANDIA|CWEILANDIA|C EILANDIA|CAILANDIA|EEILANDIA|EILANDIA|PEILANDIA|CAEILANDIA|CEIL|^\\s{0,}CEI\\s{0,}$|GUARI|CEINADIA|CEIALNDIA|P\\s{0,}SUL|P\\s{0,}NORTE|CL\\s{0,}NORTE|EIL\\s{0,}NORT|CRIL\\s{0,}NORT|QNL NORTE|ASA\\s{0,}NRO|P NROTE|^\\s{0,}SETOR\\s{0,}O\\s{0,}$|EXPANSAO SETOR O|CEI\\s{0,}L\\s{0,}SUL|^\\s{0,}CEI\\s{0,}L\\s{0,}SUL|^\\s{0,}CE\\s{0,}L\\s{0,}SUL|^\\s{0,}CEU\\s{0,}L\\s{0,}SUL|^\\s{0,}CEW.*\\s{0,}SUL|^\\s{0,}CFEIL SUL|^\\s{0,}CIL SUL\\s{0,}$|SELANDIA|^\\s{0,}QNO\\s{0,}$|^\\s{0,}SETOR P\\s{0,}$|SETOR O NORTE|EXP DO SETOR O|EXPANSAO ST O|^\\s{0,}QNR\\s{0,}$|EXPANSAO DO SETOR O|EX ST O|SETOR Q|^\\s{0,}S\\s{0,}T\\s{0,}O\\s{0,}$|QNQ|SETOR M NORTE|EXP SETOR O|AGUA FRESCA|AMARA|A.*\\s{0,}QUEN|EXP DO STO O|STOR O|STOR M NORTE|EXP STO O|SSTOR O|STO M SUL",paciente_endereco_bairro) & !grepl("LAGOP|LAGP|CENTRO SEDE|SCEE SUL|CENTRO SUL|ALIANC|BATE QUENTE|SETOR CENTRAL|CEUZEIR|BANDE|PIRES|VICENTE|NOBRE|CRUZEIR|METR|MSPN|PNEU|VERDE|CLUBE|TAGUARINGA|ARAGUARI|GUARIA|SEBAS|BANC|OFIC|TRADIC|TAC NORTE|TAGC|TRADI",paciente_endereco_bairro), "CEIL¬NDIA",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("CEILANDIA|C\\s{0,}EI.* N|CE.*\\s{0,}N|ILANDIA SUL|QUARIR|C\\s{0,}EI.* S|C\\s{0,}NORTE|C\\s{0,}SUL|C MNORTE|CEULAND|SEILAN|CWILAN|CXEIL\\s{0}SUL|CEDILANDIA|CEIALANDIA|CEIALNDIA|CEIANDIA|CEIILANDIA|CELANDIA|CELIANDIA|CELILANDIA|CELILANIDA|CERANDIA|CEWILANDIA|CIEILANDIA|CIELANDIA|CILANDIA|CLEILANDIA|CPILANDIA|CREILANDIA|CRILANDIA|CWEILANDIA|C EILANDIA|CAILANDIA|EEILANDIA|EILANDIA|PEILANDIA|CAEILANDIA|CEIL|^\\s{0,}CEI\\s{0,}$|GUARI|CEINADIA|CEIALNDIA|P\\s{0,}SUL|P\\s{0,}NORTE|CL\\s{0,}NORTE|EIL\\s{0,}NORT|CRIL\\s{0,}NORT|QNL NORTE|ASA\\s{0,}NRO|P NROTE|^\\s{0,}SETOR\\s{0,}O\\s{0,}$|EXPANSAO SETOR O|CEI\\s{0,}L\\s{0,}SUL|^\\s{0,}CEI\\s{0,}L\\s{0,}SUL|^\\s{0,}CE\\s{0,}L\\s{0,}SUL|^\\s{0,}CEU\\s{0,}L\\s{0,}SUL|^\\s{0,}CEW.*\\s{0,}SUL|^\\s{0,}CFEIL SUL|^\\s{0,}CIL SUL\\s{0,}$|SELANDIA|^\\s{0,}QNO\\s{0,}$|^\\s{0,}SETOR P\\s{0,}$|SETOR O NORTE|EXP DO SETOR O|EXPANSAO ST O|^\\s{0,}QNR\\s{0,}$|EXPANSAO DO SETOR O|EX ST O|SETOR Q|^\\s{0,}S\\s{0,}T\\s{0,}O\\s{0,}$|QNQ|SETOR M NORTE|EXP SETOR O|AGUA FRESCA|AMARA|A.*\\s{0,}QUEN|EXP DO STO O|STOR O|STOR M NORTE|EXP STO O|SSTOR O|STO M SUL",paciente_endereco_bairro) & !grepl("LAGOP|LAGP|CENTRO SEDE|SCEE SUL|CENTRO SUL|ALIANC|BATE QUENTE|SETOR CENTRAL|CEUZEIR|BANDE|PIRES|VICENTE|NOBRE|CRUZEIR|METR|MSPN|PNEU|VERDE|CLUBE|TAGUARINGA|ARAGUARI|GUARIA|SEBAS|BANC|OFIC|TRADIC|TAC NORTE|TAGC|TRADI",paciente_endereco_bairro), "CEIL√ÇNDIA",paciente_endereco_bairro))
 
-cei <- dados_df %>% filter(bairro_correto == "CEIL¬NDIA")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "CEIL¬NDIA")
+cei <- dados_df %>% filter(bairro_correto == "CEIL√ÇNDIA")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "CEIL√ÇNDIA")
 
 
 # > SOBRADINHO II ---------------------------------------------------------
@@ -66,8 +66,7 @@ dados_df <- dados_df %>%
   mutate(bairro_correto = ifelse(grepl("SOBRADINHO\\s{0,}II|SOBRADINHO\\s{0,}2|CONTAGEM|SOBRADINHOI II|SOBRADINHO\\s{0,}I\\s{0,}I|COLORAD|RABELO|CON DAS ACACIAS|VALE DAS ACACIAS|CONDOMINIO ACACIAS|CON DAS ACACIAS|^\\s{0,}SOB[D]*\\s{0,}2\\s{0,}$|VIL.*\\s{0,}RICA|SER.*\\s{0,}AZ|NOVO HORIZONTE|SETOR OESTE SOBRAD|VA.*\\s{0,}VE|SRN|NOBRES|RURAL DE SOBRADINHO|^\\s{0,}SOB[D]*\\s{0,}II\\s{0,}$|BURITIZINHO|BASEVI|SAOBRADINHO II",paciente_endereco_bairro) & !grepl("PLANALTINA|PARANOA|ME*L[L]*O*|FERCAL\\s{0,}SOBRADINHO|PLANAL|ACAMP",paciente_endereco_bairro), "SOBRADINHO II",paciente_endereco_bairro))
 
 sobradinho2 <- dados_df %>% filter(bairro_correto == "SOBRADINHO II")
-
-dados_df <- dados_df %>% filter(bairro_correto != "SOBRADINHO II")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SOBRADINHO II")
 
 
 # > SOBRADINHO I ----------------------------------------------------------
@@ -75,15 +74,14 @@ dados_df <- dados_df %>%
   mutate(bairro_correto = ifelse(grepl("SOBRADINHO\\s{0,}I\\b|SOBRADINHO\\s{0,}1|NOVA COLINA|SETOR.*\\s{0,}MAN.*\\s{0,}SOB|NUCLEO RURAL LAGO OESTE SOBRADINHO|REGIAO DOS LAGOS|ALTO DA BOA VISTA|SETOR ECONOMICO DE SOBRADINHO|SETOR INDUSTRIAL SOBRADINHO|^\\s{0,}SOB\\s{0,}I\\s{0,}$|CONDOMINIO MANSOES SOBRADINHO SOBRADINHO|CONDOMINIO COMERCIAL E RESIDENCIAL SOBRADINHO SOBRADINHO|CONDOMINIO MIRANTE DA SERRA SOBRADINHO|VAL.*\\s{0,}PIN|SWTOR DE MANSOES DE SOBRADINHO",paciente_endereco_bairro) & !grepl("PLANALTINA|PARANOA|ME*L[L]*O*|FERCAL\\s{0,}SOBRADINHO",paciente_endereco_bairro), "SOBRADINHO I",paciente_endereco_bairro))
 
 sobradinho1 <- dados_df %>% filter(bairro_correto == "SOBRADINHO I")
-
-dados_df <- dados_df %>% filter(bairro_correto != "SOBRADINHO I")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SOBRADINHO I")
 
 
 # > RECANTO DAS EMAS ------------------------------------------------------
 dados_df <- dados_df %>%
   mutate(bairro_correto = ifelse(grepl("RECANTO\\s{0,}DA[S]*\\s{0,}EMA[S]*|EMAS|^\\s{0,}RECANTO\\s{0,}DAS\\s{0,}$|^\\s{0,}RECANTO\\s{0,}$|RECANTO\\s{0,}DAS\\s{0,}E|RES.*\\s{0,}BU|^\\s{0,}REC[A]*\\s{0,}$|BETA|DF RECANTO|RES SAO FRANCISCO",paciente_endereco_bairro) & !grepl("RIACHO|URUBU",paciente_endereco_bairro), "RECANTO DAS EMAS",paciente_endereco_bairro))
 
-recanto <- dados_df %>% filter(bairro_correto == "RECANTO DAS EMAS") #Mantendo sÛ Recanto
+recanto <- dados_df %>% filter(bairro_correto == "RECANTO DAS EMAS") #Mantendo s√≥ Recanto
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "RECANTO DAS EMAS") #Excluindo Recanto
 
 
@@ -91,7 +89,7 @@ dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "RECANTO
 dados_df <- dados_df %>%
   mutate(bairro_correto = ifelse(grepl("TAGUATINGA|TAGU.*|^\\s{0,}TAGUA\\s{0,}$|^\\s{0,}TAG\\s{0,}$|TINGA|TAGUARINGA|CAGUATINGA|TAC NORTE|TAC SUL|TAG.*\\s{0,}S|TAG.*\\s{0,}N|TAG.*\\s{0,}CEN|^\\s{0,}TG\\s{0,}$|^TG.*\\s{0,}[NS]|M NROTE|^\\s{0,}M\\s{0,}NORTE\\s{0,}$|QNJ|^\\s{0,}T NORTE\\s{0,}$|TAQUATINGUA|TAQ N|TAAG NORTE|^\\s{0,}TAAG\\s{0,}$",paciente_endereco_bairro) & !grepl("CLARA|SAMAM|VICENTE|PIRE|OCT|ARNIQ|COL\\s{0,}AGR\\s{0,}SAM|MONTAGNE|GUARA",paciente_endereco_bairro), "TAGUATINGA",paciente_endereco_bairro))
 
-taguatinga <- dados_df %>% filter(bairro_correto == "TAGUATINGA") #Mantendo sÛ Taguatinga
+taguatinga <- dados_df %>% filter(bairro_correto == "TAGUATINGA") #Mantendo s√≥ Taguatinga
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "TAGUATINGA") #Excluindo Taguatinga
 
 
@@ -120,12 +118,12 @@ riacho1 <- dados_df %>% filter(bairro_correto == "RIACHO FUNDO I")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "RIACHO FUNDO I")
 
 
-# > PARANO¡ ---------------------------------------------------------------
+# > PARANO√Å ---------------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("PAR[A]*N[OU]A|ALTI\\s{0,}PLANO|ALTI\\s{0,}PALNO|ALTIPLOLESTE|ALTE\\s{0,}PLANO|PARANIO|CAPAO\\s{0,}DA\\s{0,}ERVA|CAPAO\\s{0,}SECO|CARIRU|ITAPETI|AUTIPLANO|PARN|PRARN|SUS[S]*U|^\\s{0,}PARAN\\s{0,}$|PARAN SUL|PARANA PARQUE|PARANAO|PARANBOA|PARAN[DCV]A|PARANIA|PARANO|PARANOIA|RARANOA|CAFE SEM TROCO|CAF.*\\s{0,}TR|SOB.*\\s{0,}MEL|CAPAO\\s{0,}C[OU]M",paciente_endereco_bairro) & !grepl("ITAPO|ITAPU|D LAGO|DEL LAGO|SAO|PLANALTO|FAZE",paciente_endereco_bairro), "PARANO¡",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("PAR[A]*N[OU]A|ALTI\\s{0,}PLANO|ALTI\\s{0,}PALNO|ALTIPLOLESTE|ALTE\\s{0,}PLANO|PARANIO|CAPAO\\s{0,}DA\\s{0,}ERVA|CAPAO\\s{0,}SECO|CARIRU|ITAPETI|AUTIPLANO|PARN|PRARN|SUS[S]*U|^\\s{0,}PARAN\\s{0,}$|PARAN SUL|PARANA PARQUE|PARANAO|PARANBOA|PARAN[DCV]A|PARANIA|PARANO|PARANOIA|RARANOA|CAFE SEM TROCO|CAF.*\\s{0,}TR|SOB.*\\s{0,}MEL|CAPAO\\s{0,}C[OU]M",paciente_endereco_bairro) & !grepl("ITAPO|ITAPU|D LAGO|DEL LAGO|SAO|PLANALTO|FAZE",paciente_endereco_bairro), "PARANO√Å",paciente_endereco_bairro))
 
-paranoa <- dados_df %>% filter(bairro_correto == "PARANO¡")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "PARANO¡")
+paranoa <- dados_df %>% filter(bairro_correto == "PARANO√Å")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "PARANO√Å")
 
 
 # > PLANO PILOTO ----------------------------------------------------------
@@ -136,13 +134,13 @@ plano <- dados_df %>% filter(bairro_correto == "PLANO PILOTO")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "PLANO PILOTO")
 
 
-# > ¡GUAS CLARAS ----------------------------------------------------------
+# > √ÅGUAS CLARAS ----------------------------------------------------------
 dados_df <- dados_df %>%
   mutate(bairro_correto = ifelse(grepl("AGUAS\\s{0,}[CG]|AGUAS\\s{0,}AC|A\\s{0,}CLARAS|AG.* C|AGUA\\s{0,}C|AGUS\\s{0,}CL|AGUA[SA]*\\s{0,}[C]*LARA[S]|AREAL|PARNAS|A C LARAS|A CALARAS|A CALRAS|A CL|A GUAS CLARAS|AL.*\\s{0,}ACACIAS|AV.*\\s{0,}ACACIAS",paciente_endereco_bairro) & !grepl("A\\s{0,}CLARA.* TAG|AG.* C.* TAG|AGUAS CLARAS  TGUA|AGUAS CLARAS TG|TAG.* C|TAGUA C|ARNI|AGRIC|COL\\s{0,}A|COLONIA A|C\\s{0,}A AGUAS|LAGO|VALE DAS|TAG\\s{0,}AGUAS CLARAS|TAGUATINGA AGUAS CL|TAGUATINGAACLARAS|	
-TAGUATINGAAGUAS", paciente_endereco_bairro), "¡GUAS CLARAS",paciente_endereco_bairro))
+TAGUATINGAAGUAS", paciente_endereco_bairro), "√ÅGUAS CLARAS",paciente_endereco_bairro))
 
-aguas <- dados_df %>% filter(bairro_correto == "¡GUAS CLARAS")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "¡GUAS CLARAS")
+aguas <- dados_df %>% filter(bairro_correto == "√ÅGUAS CLARAS")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "√ÅGUAS CLARAS")
 
 
 # > LAGO SUL --------------------------------------------------------------
@@ -177,12 +175,12 @@ planaltina <- dados_df %>% filter(bairro_correto == "PLANALTINA")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "PLANALTINA")
 
 
-# > N⁄CLEO BANDEIRANTE ----------------------------------------------------
+# > N√öCLEO BANDEIRANTE ----------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("BAND|CAUHY|METROP|^\\s{0,}N\\s{0,}B\\s{0,}$|DIVINE",paciente_endereco_bairro) & !grepl("CAND|PARK|WAY|FUNDO|VILA METROPOLITANA|RESIDENCIAL METROPOL|SAIAO|SAYAO", paciente_endereco_bairro), "N⁄CLEO BANDEIRANTE",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("BAND|CAUHY|METROP|^\\s{0,}N\\s{0,}B\\s{0,}$|DIVINE",paciente_endereco_bairro) & !grepl("CAND|PARK|WAY|FUNDO|VILA METROPOLITANA|RESIDENCIAL METROPOL|SAIAO|SAYAO", paciente_endereco_bairro), "N√öCLEO BANDEIRANTE",paciente_endereco_bairro))
 
-nucleo <- dados_df %>% filter(bairro_correto == "N⁄CLEO BANDEIRANTE")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "N⁄CLEO BANDEIRANTE")
+nucleo <- dados_df %>% filter(bairro_correto == "N√öCLEO BANDEIRANTE")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "N√öCLEO BANDEIRANTE")
 
 
 # > VICENTE PIRES ---------------------------------------------------------
@@ -201,36 +199,36 @@ samamba <- dados_df %>% filter(bairro_correto == "SAMAMBAIA")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SAMAMBAIA")
 
 
-# > CANDANGOL¬NDIA --------------------------------------------------------
+# > CANDANGOL√ÇNDIA --------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("CAND|GOLA",paciente_endereco_bairro) & !grepl("BRAZ|BAND|JOAO|CANDIDO|SEBAST", paciente_endereco_bairro), "CANDANGOL¬NDIA",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("CAND|GOLA",paciente_endereco_bairro) & !grepl("BRAZ|BAND|JOAO|CANDIDO|SEBAST", paciente_endereco_bairro), "CANDANGOL√ÇNDIA",paciente_endereco_bairro))
 
-candanga <- dados_df %>% filter(bairro_correto == "CANDANGOL¬NDIA")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "CANDANGOL¬NDIA")
+candanga <- dados_df %>% filter(bairro_correto == "CANDANGOL√ÇNDIA")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "CANDANGOL√ÇNDIA")
 
 
-# > GUAR¡ -----------------------------------------------------------------
+# > GUAR√Å -----------------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("GUAR[R]*A|LUCIO|L.*\\s{0,}COSTA|PARK\\s{0,}SUL|GARRA|SAIAO|SAYAO|GURA II|SOF SUL|QUADRAS ECONOMICAS|^\\s{0,}G\\s{0,}I\\s{0,}[I*]\\s{0,}$",paciente_endereco_bairro) & !grepl("GUARAPARI|ESTRUTUR|COSTA VERDE|SEBAST", paciente_endereco_bairro), "GUAR¡",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("GUAR[R]*A|LUCIO|L.*\\s{0,}COSTA|PARK\\s{0,}SUL|GARRA|SAIAO|SAYAO|GURA II|SOF SUL|QUADRAS ECONOMICAS|^\\s{0,}G\\s{0,}I\\s{0,}[I*]\\s{0,}$",paciente_endereco_bairro) & !grepl("GUARAPARI|ESTRUTUR|COSTA VERDE|SEBAST", paciente_endereco_bairro), "GUAR√Å",paciente_endereco_bairro))
 
-guara <- dados_df %>% filter(bairro_correto == "GUAR¡")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "GUAR¡")
+guara <- dados_df %>% filter(bairro_correto == "GUAR√Å")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "GUAR√Å")
 
 
-# > BRAZL¬NDIA ------------------------------------------------------------
+# > BRAZL√ÇNDIA ------------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("BRAZ|VEREDAS|INCRA|BRASL|ZLAN|ALE.*\\s{0,}GU|ALMECEGAS|^\\s{0,}BURITS\\s{0,}$|^\\s{0,}BURITIS\\s{0,}$|CURRALINHO|RADIOBRAS|RODEADOR|CHAPADINHA|VILA SAO JOSE|CASCALHEIRA",paciente_endereco_bairro) & !grepl("CAND|RADIOBRAZ|SOBRA|BRASLILIA|BRASLIA|VILA RORIZ|SEBAST", paciente_endereco_bairro), "BRAZL¬NDIA",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("BRAZ|VEREDAS|INCRA|BRASL|ZLAN|ALE.*\\s{0,}GU|ALMECEGAS|^\\s{0,}BURITS\\s{0,}$|^\\s{0,}BURITIS\\s{0,}$|CURRALINHO|RADIOBRAS|RODEADOR|CHAPADINHA|VILA SAO JOSE|CASCALHEIRA",paciente_endereco_bairro) & !grepl("CAND|RADIOBRAZ|SOBRA|BRASLILIA|BRASLIA|VILA RORIZ|SEBAST", paciente_endereco_bairro), "BRAZL√ÇNDIA",paciente_endereco_bairro))
 
-braz <- dados_df %>% filter(bairro_correto == "BRAZL¬NDIA")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "BRAZL¬NDIA")
+braz <- dados_df %>% filter(bairro_correto == "BRAZL√ÇNDIA")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "BRAZL√ÇNDIA")
 
 
-# > S√O SEBASTI√O ---------------------------------------------------------
+# > S√ÉO SEBASTI√ÉO ---------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("SEBAS|AGUIL|COMPRIDO|CRIXA|TABOQUINHA|MA[INM]GUEIR|MORRO\\s{0,}AZUL|SETOR\\s{0,}TRADICIONAL|PALMARES|RESIDENCIAL\\s{0,}VITORIA|TIAO|SAO\\s{0,}SE|JARD.*\\s{0,}MA.*\\s{0,}AL|AMNGUEIRAL|MANG|AGROVI|JARDINS DAS ACACIAS|MORRO DA CRUZ|CAVAS DE BAIXO|^\\s{0,}CAVAS\\s{0,}$|BONSUCESSO|VILA DO BOA|RESIDENCIAL BOSQUE|RES VITORIA|RES BOSQUE|RESID DO BOSQUE|RESIDENCIAL DO BOSQUE|RES DO BOSQUE|RESIDENCIAL DO BOSQ|JOAO CANDIDO|^\\s{0,}BOSQUE\\s{0,}$|BARTOLOMEU|PAPUDA|L[OI]MEU",paciente_endereco_bairro) & !grepl("BOTAN|SOBRA|ANSAO|MANGABA" ,paciente_endereco_bairro), "S√O SEBASTI√O",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("SEBAS|AGUIL|COMPRIDO|CRIXA|TABOQUINHA|MA[INM]GUEIR|MORRO\\s{0,}AZUL|SETOR\\s{0,}TRADICIONAL|PALMARES|RESIDENCIAL\\s{0,}VITORIA|TIAO|SAO\\s{0,}SE|JARD.*\\s{0,}MA.*\\s{0,}AL|AMNGUEIRAL|MANG|AGROVI|JARDINS DAS ACACIAS|MORRO DA CRUZ|CAVAS DE BAIXO|^\\s{0,}CAVAS\\s{0,}$|BONSUCESSO|VILA DO BOA|RESIDENCIAL BOSQUE|RES VITORIA|RES BOSQUE|RESID DO BOSQUE|RESIDENCIAL DO BOSQUE|RES DO BOSQUE|RESIDENCIAL DO BOSQ|JOAO CANDIDO|^\\s{0,}BOSQUE\\s{0,}$|BARTOLOMEU|PAPUDA|L[OI]MEU",paciente_endereco_bairro) & !grepl("BOTAN|SOBRA|ANSAO|MANGABA" ,paciente_endereco_bairro), "S√ÉO SEBASTI√ÉO",paciente_endereco_bairro))
 
-sebast <- dados_df %>% filter(bairro_correto == "S√O SEBASTI√O")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "S√O SEBASTI√O")
+sebast <- dados_df %>% filter(bairro_correto == "S√ÉO SEBASTI√ÉO")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "S√ÉO SEBASTI√ÉO")
 
 
 # > PARK WAY --------------------------------------------------------------
@@ -249,31 +247,31 @@ cruzeiro <- dados_df %>% filter(bairro_correto == "CRUZEIRO")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "CRUZEIRO")
 
 
-# > ITAPO√ ----------------------------------------------------------------
+# > ITAPO√É ----------------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("[I]*TAP[UO][A]|POA|ITAO*|^\\s{0,}FAZENDINHA\\s{0,}$|DEL.*\\s{0,}LAG",paciente_endereco_bairro) & !grepl("PARAN|ITAPETI|POANGA" ,paciente_endereco_bairro), "ITAPO√",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("[I]*TAP[UO][A]|POA|ITAO*|^\\s{0,}FAZENDINHA\\s{0,}$|DEL.*\\s{0,}LAG",paciente_endereco_bairro) & !grepl("PARAN|ITAPETI|POANGA" ,paciente_endereco_bairro), "ITAPO√É",paciente_endereco_bairro))
 
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("DEL.*\\s{0,}LAG|DEL ALGO|DEL LADO|DEL LOGO|DELAGO|DELALGO",paciente_endereco_bairro), "ITAPO√",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("DEL.*\\s{0,}LAG|DEL ALGO|DEL LADO|DEL LOGO|DELAGO|DELALGO",paciente_endereco_bairro), "ITAPO√É",paciente_endereco_bairro))
 
-itapoa <- dados_df %>% filter(bairro_correto == "ITAPO√")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "ITAPO√")
+itapoa <- dados_df %>% filter(bairro_correto == "ITAPO√É")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "ITAPO√É")
 
 
-# > JARDIM BOT¬NICO -------------------------------------------------------
+# > JARDIM BOT√ÇNICO -------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("BOT|J.*\\s{0,}BOA|JA.*\\s{0,}BO|NICO|J.*\\s{0,}BTA|QU.*\\s{0,}INTE|JA.*\\s{0,}DO\\s{0,}LA|J BOT|JD BOT|S H J B LAGO SUL|SOLAR DE BRASI|JARDIM IMPERIAL|SHJB",paciente_endereco_bairro) & !grepl("FOGO|BOTIG|UNICO" ,paciente_endereco_bairro), "JARDIM BOT¬NICO",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("BOT|J.*\\s{0,}BOA|JA.*\\s{0,}BO|NICO|J.*\\s{0,}BTA|QU.*\\s{0,}INTE|JA.*\\s{0,}DO\\s{0,}LA|J BOT|JD BOT|S H J B LAGO SUL|SOLAR DE BRASI|JARDIM IMPERIAL|SHJB",paciente_endereco_bairro) & !grepl("FOGO|BOTIG|UNICO" ,paciente_endereco_bairro), "JARDIM BOT√ÇNICO",paciente_endereco_bairro))
 
-jardim <- dados_df %>% filter(bairro_correto == "JARDIM BOT¬NICO")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "JARDIM BOT¬NICO")
+jardim <- dados_df %>% filter(bairro_correto == "JARDIM BOT√ÇNICO")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "JARDIM BOT√ÇNICO")
 
 
-# > VARJ√O ----------------------------------------------------------------
+# > VARJ√ÉO ----------------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("V[A]*RJ|JAO",paciente_endereco_bairro), "VARJ√O",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("V[A]*RJ|JAO",paciente_endereco_bairro), "VARJ√ÉO",paciente_endereco_bairro))
 
-varjao <- dados_df %>% filter(bairro_correto == "VARJ√O")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "VARJ√O")
+varjao <- dados_df %>% filter(bairro_correto == "VARJ√ÉO")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "VARJ√ÉO")
 
 
 # > ARNIQUEIRA ------------------------------------------------------------
@@ -316,15 +314,15 @@ estrut <- dados_df %>% filter(bairro_correto == "SCIA/ESTRUTURAL")
 dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "SCIA/ESTRUTURAL")
 
 
-# > TIRANDO O GOI¡S -------------------------------------------------------
+# > TIRANDO O GOI√ÅS -------------------------------------------------------
 dados_df <- dados_df %>%
-  mutate(bairro_correto = ifelse(grepl("GOIAS|LINDA|PADRE|BERN|GOIANIA|\\bGO\\b|PED[R]*EG|VALP|OCID|LUZIAN|N.*\\s{0,}GAMA|FORMOS|J.*\\s{0,}INGA|DESC|SANTO ANTONIO DO [PD]E|VAL P|VAPA|CATAL",paciente_endereco_bairro) & !grepl("OLINDA|VILA SAO BERNARDO|MARINGA|DESCON" ,paciente_endereco_bairro), "GOI¡S",paciente_endereco_bairro))
+  mutate(bairro_correto = ifelse(grepl("GOIAS|LINDA|PADRE|BERN|GOIANIA|\\bGO\\b|PED[R]*EG|VALP|OCID|LUZIAN|N.*\\s{0,}GAMA|FORMOS|J.*\\s{0,}INGA|DESC|SANTO ANTONIO DO [PD]E|VAL P|VAPA|CATAL",paciente_endereco_bairro) & !grepl("OLINDA|VILA SAO BERNARDO|MARINGA|DESCON" ,paciente_endereco_bairro), "GOI√ÅS",paciente_endereco_bairro))
 
-goias <- dados_df %>% filter(bairro_correto == "GOI¡S")
-dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "GOI¡S")
+goias <- dados_df %>% filter(bairro_correto == "GOI√ÅS")
+dados_df <- dados_df %>% filter(is.na(bairro_correto)|bairro_correto != "GOI√ÅS")
 
 
-# > SUBSTITUINDO SEM INFORMA«’ES ------------------------------------------
+# > SUBSTITUINDO SEM INFORMA√á√ïES ------------------------------------------
 dados_df <- dados_df %>%  mutate(bairro_correto = ifelse(grepl("SEM INFORMACAO|NAO\\s{0,}INF.*|NAO\\s{0,}CONSTA|BAIRRO\\s{0,}DESCONHECIDO|N\\s{0,}INFOR.*",paciente_endereco_bairro), "",paciente_endereco_bairro))
 
 seminfo <- dados_df %>% filter(bairro_correto == "")
@@ -343,11 +341,11 @@ dados_ceps <- dados_df %>% filter(!is.na(paciente_endereco_cep))
 
 # Trabalhando com os CEPs -------------------------------------------------
 
-# Filtrando CEPs inv·lidos
+# Filtrando CEPs inv√°lidos
 cep_valido <- dados_ceps %>% filter(paciente_endereco_cep > 70000 & paciente_endereco_cep < 80000 & paciente_endereco_cep != 71000 & paciente_endereco_cep != 72000 & paciente_endereco_cep != 73000 & paciente_endereco_cep != 74000& paciente_endereco_cep != 75000& paciente_endereco_cep != 76000 & paciente_endereco_cep != 77000 & paciente_endereco_cep != 78000 & paciente_endereco_cep != 79000)
 
 colnames(cep_valido)[3] <- "cep"
-ceps$cep <- as.numeric(substr(ceps$cep, 1, 5)) #pegando os primeiros 5 dÌgitos dos CEPs
+ceps$cep <- as.numeric(substr(ceps$cep, 1, 5)) #pegando os primeiros 5 d√≠gitos dos CEPs
 
 cep_valido$ras_corretas <- ceps$RA[match(cep_valido$cep,ceps$cep)]
 
@@ -355,22 +353,22 @@ cep_valido <- cep_valido %>%  mutate(ras_corretas = toupper(ras_corretas))
 #cep_valido <- cep_valido %>%  group_by(ras_corretas) %>% count(ras_corretas)
 
 ceps_ajustados <- cep_valido %>%
-  mutate(ras_corretas = ifelse(grepl("¡GUAS CLARAS", ras_corretas) & !grepl("ARNIQUEIRA", ras_corretas), "¡GUAS CLARAS", ras_corretas),
+  mutate(ras_corretas = ifelse(grepl("√ÅGUAS CLARAS", ras_corretas) & !grepl("ARNIQUEIRA", ras_corretas), "√ÅGUAS CLARAS", ras_corretas),
          ras_corretas = ifelse(grepl("ARNIQUEIRA", ras_corretas), "ARNIQUEIRA", ras_corretas),
-         ras_corretas = ifelse(grepl("ASA SUL|ASA NORTE|TELEB|CÕVI|PLANALTO|DARCY|GRAN|MIL|NORO|SETORES COMPLEMENTARES", ras_corretas), "PLANO PILOTO", ras_corretas),
-         ras_corretas = ifelse(grepl("BRAZ", ras_corretas), "BRAZL¬NDIA", ras_corretas),
-         ras_corretas = ifelse(grepl("CANDAN", ras_corretas), "CANDANGOL¬NDIA", ras_corretas),
-         ras_corretas = ifelse(grepl("CEI", ras_corretas), "CEIL¬NDIA", ras_corretas),
+         ras_corretas = ifelse(grepl("ASA SUL|ASA NORTE|TELEB|C√çVI|PLANALTO|DARCY|GRAN|MIL|NORO|SETORES COMPLEMENTARES", ras_corretas), "PLANO PILOTO", ras_corretas),
+         ras_corretas = ifelse(grepl("BRAZ", ras_corretas), "BRAZL√ÇNDIA", ras_corretas),
+         ras_corretas = ifelse(grepl("CANDAN", ras_corretas), "CANDANGOL√ÇNDIA", ras_corretas),
+         ras_corretas = ifelse(grepl("CEI", ras_corretas), "CEIL√ÇNDIA", ras_corretas),
          ras_corretas = ifelse(grepl("CRUZ", ras_corretas), "CRUZEIRO", ras_corretas),
          ras_corretas = ifelse(grepl("FER", ras_corretas), "FERCAL", ras_corretas),
          ras_corretas = ifelse(grepl("GAMA", ras_corretas), "GAMA", ras_corretas),
-         ras_corretas = ifelse(grepl("GUAR", ras_corretas), "GUAR¡", ras_corretas),
-         ras_corretas = ifelse(grepl("ITAP", ras_corretas), "ITAPO√", ras_corretas),
-         ras_corretas = ifelse(grepl("BOT", ras_corretas), "JARDIM BOT¬NICO", ras_corretas),
-         ras_corretas = ifelse(grepl("LAGO N|SETOR DE HABITA«’ES INDIVIDUAIS NORTE", ras_corretas), "LAGO NORTE", ras_corretas),
-         ras_corretas = ifelse(grepl("LAGO S|SETOR DE HABITA«’ES INDIVIDUAIS SUL", ras_corretas), "LAGO SUL", ras_corretas),
-         ras_corretas = ifelse(grepl("BAND", ras_corretas), "N⁄CLEO BANDEIRANTE", ras_corretas),
-         ras_corretas = ifelse(grepl("PARA", ras_corretas), "PARANO¡", ras_corretas),
+         ras_corretas = ifelse(grepl("GUAR", ras_corretas), "GUAR√Å", ras_corretas),
+         ras_corretas = ifelse(grepl("ITAP", ras_corretas), "ITAPO√É", ras_corretas),
+         ras_corretas = ifelse(grepl("BOT", ras_corretas), "JARDIM BOT√ÇNICO", ras_corretas),
+         ras_corretas = ifelse(grepl("LAGO N|SETOR DE HABITA√á√ïES INDIVIDUAIS NORTE", ras_corretas), "LAGO NORTE", ras_corretas),
+         ras_corretas = ifelse(grepl("LAGO S|SETOR DE HABITA√á√ïES INDIVIDUAIS SUL", ras_corretas), "LAGO SUL", ras_corretas),
+         ras_corretas = ifelse(grepl("BAND", ras_corretas), "N√öCLEO BANDEIRANTE", ras_corretas),
+         ras_corretas = ifelse(grepl("PARA", ras_corretas), "PARANO√Å", ras_corretas),
          ras_corretas = ifelse(grepl("WAY", ras_corretas), "PARK WAY", ras_corretas),
          ras_corretas = ifelse(grepl("PLANALTI", ras_corretas), "PLANALTINA", ras_corretas),
          ras_corretas = ifelse(grepl("EMAS", ras_corretas), "RECANTO DAS EMAS", ras_corretas),
@@ -378,15 +376,15 @@ ceps_ajustados <- cep_valido %>%
          ras_corretas = ifelse(grepl("FUNDO II", ras_corretas), "RIACHO FUNDO II", ras_corretas),
          ras_corretas = ifelse(grepl("SAMAM", ras_corretas), "SAMAMBAIA", ras_corretas),
          ras_corretas = ifelse(grepl("SANTA", ras_corretas), "SANTA MARIA", ras_corretas),
-         ras_corretas = ifelse(grepl("SEBA", ras_corretas), "S√O SEBASTI√O", ras_corretas),
+         ras_corretas = ifelse(grepl("SEBA", ras_corretas), "S√ÉO SEBASTI√ÉO", ras_corretas),
          ras_corretas = ifelse(grepl("ESTRU", ras_corretas), "SCIA/ESTRUTURAL", ras_corretas),
          ras_corretas = ifelse(grepl("ZONA INDUSTRIAL", ras_corretas), "SIA", ras_corretas),
          ras_corretas = ifelse(grepl("SOBRADINHO II", ras_corretas), "SOBRADINHO II", ras_corretas),
          ras_corretas = ifelse(grepl("SOBRADINHO", ras_corretas)& !grepl("SOBRADINHO II", ras_corretas), "SOBRADINHO I", ras_corretas),
-         ras_corretas = ifelse(grepl("SOL NASCENTE|P‘R DO SOL", ras_corretas), "SOL NASCENTE/P‘R DO SOL", ras_corretas),
+         ras_corretas = ifelse(grepl("SOL NASCENTE|P√îR DO SOL", ras_corretas), "SOL NASCENTE/P√îR DO SOL", ras_corretas),
          ras_corretas = ifelse(grepl("OCT|SUDO", ras_corretas), "SUDOESTE/OCTOGONAL", ras_corretas),
          ras_corretas = ifelse(grepl("TAG", ras_corretas), "TAGUATINGA", ras_corretas),
-         ras_corretas = ifelse(grepl("VARJ", ras_corretas), "VARJ√O", ras_corretas),
+         ras_corretas = ifelse(grepl("VARJ", ras_corretas), "VARJ√ÉO", ras_corretas),
          ras_corretas = ifelse(grepl("PIR", ras_corretas), "VICENTE PIRES", ras_corretas))
 
 ceps_ajustados <- ceps_ajustados %>% mutate(ras_corretas = ifelse(ras_corretas == "", NA, ras_corretas))
@@ -394,21 +392,21 @@ ceps_ajustados <- ceps_ajustados %>% filter(!is.na(ras_corretas))
 ceps_ajustados <- ceps_ajustados %>% group_by(ras_corretas) %>% count(ras_corretas)
 
 sum(ceps_ajustados$n)
-aguas2 <- sum(length(aguas$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="¡GUAS CLARAS"])
+aguas2 <- sum(length(aguas$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="√ÅGUAS CLARAS"])
 arniq2 <- sum(length(arniq$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="ARNIQUEIRA"])
-braz2 <- sum(length(braz$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="BRAZL¬NDIA"])
-candanga2 <- sum(length(candanga$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="CANDANGOL¬NDIA"])
-cei2 <- sum(length(cei$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="CEIL¬NDIA"])
+braz2 <- sum(length(braz$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="BRAZL√ÇNDIA"])
+candanga2 <- sum(length(candanga$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="CANDANGOL√ÇNDIA"])
+cei2 <- sum(length(cei$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="CEIL√ÇNDIA"])
 cruzeiro2 <- sum(length(cruzeiro$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="CRUZEIRO"])
 fercal2 <- sum(length(fercal$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="FERCAL"])
 gama2 <- sum(length(gama$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="GAMA"])
-guara2 <- sum(length(guara$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="GUAR¡"])
-itapoa2 <- sum(length(itapoa$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="ITAPO√"])
-jardim2 <- sum(length(jardim$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="JARDIM BOT¬NICO"])
+guara2 <- sum(length(guara$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="GUAR√Å"])
+itapoa2 <- sum(length(itapoa$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="ITAPO√É"])
+jardim2 <- sum(length(jardim$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="JARDIM BOT√ÇNICO"])
 lagonorte2 <- sum(length(lagonorte$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="LAGO NORTE"])
 lagosul2 <- sum(length(lagosul$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="LAGO SUL"])
-nucleo2 <- sum(length(nucleo$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="N⁄CLEO BANDEIRANTE"])
-paranoa2 <- sum(length(paranoa$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="PARANO¡"])
+nucleo2 <- sum(length(nucleo$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="N√öCLEO BANDEIRANTE"])
+paranoa2 <- sum(length(paranoa$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="PARANO√Å"])
 parkway2 <- sum(length(parkway$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="PARK WAY"])
 planaltina2 <- sum(length(planaltina$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="PLANALTINA"])
 plano2 <- sum(length(plano$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="PLANO PILOTO"])
@@ -417,24 +415,24 @@ riacho12 <- sum(length(riacho1$bairro_correto),ceps_ajustados$n[ceps_ajustados$r
 riacho22 <- sum(length(riacho2$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="RIACHO FUNDO II"])
 samamba2 <- sum(length(samamba$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SAMAMBAIA"])
 santa2 <- sum(length(santa$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SANTA MARIA"])
-sebast2 <- sum(length(sebast$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="S√O SEBASTI√O"])
+sebast2 <- sum(length(sebast$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="S√ÉO SEBASTI√ÉO"])
 estrut2 <- sum(length(estrut$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SCIA/ESTRUTURAL"])
 sia2 <- sum(length(sia$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SIA"])
 sobradinho22 <- sum(length(sobradinho2$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SOBRADINHO II"])
 sobradinho12 <- sum(length(sobradinho1$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SOBRADINHO I"])
-sol2 <- sum(length(sol$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SOL NASCENTE/P‘R DO SOL"])
+sol2 <- sum(length(sol$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SOL NASCENTE/P√îR DO SOL"])
 sdk2 <- sum(length(sdk$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="SUDOESTE/OCTOGONAL"])
 taguatinga2 <- sum(length(taguatinga$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="TAGUATINGA"])
-varjao2 <- sum(length(varjao$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="VARJ√O"])
+varjao2 <- sum(length(varjao$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="VARJ√ÉO"])
 vicente2 <- sum(length(vicente$bairro_correto),ceps_ajustados$n[ceps_ajustados$ras_corretas=="VICENTE PIRES"])
 
 
-ras_finais <-  matrix(c("¡GUAS CLARAS","ARNIQUEIRA", "BRAZL¬NDIA","CANDANGOL¬NDIA", "CEIL¬NDIA",
-                        "CRUZEIRO", "FERCAL", "GAMA", "GUAR¡", "ITAPO√", "JARDIM BOT¬NICO", "LAGO NORTE",
-                        "LAGO SUL", "N⁄CLEO BANDEIRANTE", "PARANO¡", "PARK WAY", "PLANALTINA", "PLANO PILOTO", "RECANTO DAS EMAS",
-                        "RIACHO FUNDO I", "RIACHO FUNDO II", "SAMAMBAIA", "SANTA MARIA", "S√O SEBASTI√O",
-                        "SCIA/ESTRUTURAL", "SIA", "SOBRADINHO I", "SOBRADINHO II", "SOL NASCENTE/P‘R DO SOL",
-                        "SUDOESTE/OCTOGONAL", "TAGUATINGA", "VARJ√O", "VICENTE PIRES", aguas2, arniq2, braz2, candanga2, cei2, 
+ras_finais <-  matrix(c("√ÅGUAS CLARAS","ARNIQUEIRA", "BRAZL√ÇNDIA","CANDANGOL√ÇNDIA", "CEIL√ÇNDIA",
+                        "CRUZEIRO", "FERCAL", "GAMA", "GUAR√Å", "ITAPO√É", "JARDIM BOT√ÇNICO", "LAGO NORTE",
+                        "LAGO SUL", "N√öCLEO BANDEIRANTE", "PARANO√Å", "PARK WAY", "PLANALTINA", "PLANO PILOTO", "RECANTO DAS EMAS",
+                        "RIACHO FUNDO I", "RIACHO FUNDO II", "SAMAMBAIA", "SANTA MARIA", "S√ÉO SEBASTI√ÉO",
+                        "SCIA/ESTRUTURAL", "SIA", "SOBRADINHO I", "SOBRADINHO II", "SOL NASCENTE/P√îR DO SOL",
+                        "SUDOESTE/OCTOGONAL", "TAGUATINGA", "VARJ√ÉO", "VICENTE PIRES", aguas2, arniq2, braz2, candanga2, cei2, 
                         cruzeiro2, fercal2, gama2, guara2, itapoa2, jardim2, lagonorte2, lagosul2, nucleo2, paranoa2,
                         parkway2, planaltina2, plano2, recanto2, riacho12, riacho22, samamba2, santa2, sebast2, estrut2, sia2, sobradinho12, 
                         sobradinho22, sol2, sdk2, taguatinga2, varjao2, vicente2), ncol=2, byrow = F)
