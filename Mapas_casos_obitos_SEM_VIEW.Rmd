@@ -1,0 +1,256 @@
+---
+title: "Mapas de incidência de casos e óbitos de Covid-19"
+author: "Centro de informações estratégicas em vigilância em saúde - CIEVS"
+output:
+  pdf_document:
+    keep_tex: false
+knit: (
+  function(inputFile, encoding) { 
+
+    rmarkdown::render( 
+      input       = inputFile, 
+      encoding    = encoding, 
+      params      = list(sub_title = pSubTitle),      
+      output_file = paste0("Mapas casos e obitos - ", paste0(format(Sys.Date(), "%d.%m.%Y"), ".pdf")))})
+---
+
+
+```{r include=FALSE}
+#'*Script de automatização da Matriz de Risco Covid-19 COM VIEW e COM PDF*
+
+rm(list=ls())
+gc()
+
+options(repos=structure(c(CRAN="https://vps.fmvz.usp.br/CRAN/"))) #colocando o mirror de São Paulo
+
+if (!require("knitr")) install.packages("knitr")
+library(knitr)
+tinytex::install_tinytex()
+```
+
+```{r include=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, lubridate, tibbletime, dplyr, data.table, epitools, sf,
+              knitr, read.dbc, DBI, odbc, openxlsx, devtools, qdapRegex, ggthemes, ggspatial)
+
+devtools::install_github("yutannihilation/ggsflabel")
+library(ggsflabel)
+```
+
+```{r include=FALSE}
+# BANCOS UTILIZADOS -------------------------------------------------------
+
+# Fazendo download do painel 
+setwd(getwd())
+
+painelhoje <- read.xlsx('Último painel do dia.xlsx')
+painel <- painelhoje %>% select("id", "RA", "dataPrimeiroSintomas", "classificacaoFinal", "dataObito", "Vacinado",
+                                "Dose_1", "Dose_2", "Dose_Reforco")
+rm(painelhoje) #removendo o painel com muitas variáveis
+
+
+pop_ra_cievs <- read.csv2("Arquivos_auxiliares/populacao_ra.csv", encoding = "WINDOWS-1252") %>%
+                        rename(`Região de Saúde`= RS,
+                               `População`= Pop)%>%
+                        mutate(`População` = as.double(`População`),
+                                 RA = ifelse(RA=="S I A", "SIA", RA))
+
+hoje <- Sys.Date()
+options(scipen = 9999) #tirar notação científica
+
+anos <- c("2020", "2021")
+
+```
+
+```{r include=FALSE}
+# Configurações gerais ----------------------------------------------------
+
+# > Transformando vazios na RA e sistema penitenciário em NA --------------
+painel <- painel %>% mutate(RA = ifelse(RA == "", NA, RA)) %>% 
+                     mutate(RA = ifelse(RA == " ", NA, RA)) %>% 
+                     mutate(RA = ifelse(RA == "Sistema Penitenciário", NA, RA))
+
+# > Transformando datas e criando semanas epidemiológicas -----------------
+#painel[,dataSin := as.Date(dataPrimeiroSintomas, "%Y-%m-%d")]
+painel <- painel %>% mutate(dataSin = as.Date(dataPrimeiroSintomas, "%d/%m/%Y")) #casos
+painel <- painel %>% mutate(dataObt = as.Date(dataObito, "%d/%m/%Y")) #óbitos
+
+
+# Polígonos ---------------------------------------------------------------
+
+my_spdf <- read_sf(dsn = "Arquivos_auxiliares/.",
+                  layer = "Regioes_Administrativas") %>% 
+                  rename(RA = ra) %>% 
+                  mutate(RA = ifelse(RA == "ARNIQUEIRA","ÁGUAS CLARAS",
+                  ifelse(RA == "PÔR DO SOL","CEILÂNDIA", RA )))
+
+# Populações das RAs ------------------------------------------------------
+
+tab_pop_ra <- pop_ra_cievs %>%
+  group_by(RA)%>%
+  dplyr::summarize(pop = sum(`População`, na.rm=T))
+
+tab_pop_ra2 <- tab_pop_ra %>%
+  mutate(RA = toupper(RA))
+```
+
+```{r include=FALSE}
+# Casos -------------------------------------------------------------------
+
+painelData <- as_tbl_time(painel, index = dataSin) #transformando a data novamente
+painelcasos <- painelData[order(painelData$dataSin),] #ordenando a data
+painelcasos <- painelcasos %>% mutate(mes_casos = format(dataSin, format="%B"))
+```
+
+```{r, include=F}
+# Mapa para casos de Covid-19 ---------------------------------------------
+
+for (i in anos){
+  if (i == "2020"){
+    meses <- c("fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro",  "outubro", "novembro", "dezembro")
+    
+  }
+  if (i == "2021"){
+    meses <- c("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro",  "outubro", "novembro", "dezembro")
+  }
+  
+  for (j in meses){
+    
+    painelcasos20 <- filter_time(painelcasos, ~ i)
+    painelcasos20 <- painelcasos20 %>% filter(mes_casos == j)
+    
+    casos <- painelcasos20 %>%
+      filter(!is.na(RA) | RA == "") %>%
+      mutate(RA = toupper(RA)) %>%
+      mutate(RA = ifelse(RA == "ARNIQUEIRA", "ÁGUAS CLARAS",
+                         ifelse(RA == "SOL NASCENTE", "CEILÂNDIA", RA)))%>%
+      group_by(RA) %>%
+      dplyr::summarize(Casos=n())
+    
+    # Incidência de casos 
+    
+    inci <- left_join(casos, tab_pop_ra2)%>%
+      mutate(Inci = Casos/pop*100000)
+    
+    inci_mapa <- left_join(my_spdf, inci)
+    
+    inci_mapa$mid <- sf::st_centroid(inci_mapa$geometry)
+    
+    inci_mapa <- inci_mapa%>%
+      mutate(RA = unlist(TC(RA)))%>%
+      mutate(RA = gsub("Águas", "A.", RA),
+             RA = gsub("Vicente", "V.", RA),
+             RA = gsub("Santa", "S.", RA),
+             RA = gsub("Riacho", "R.", RA),
+             RA = gsub("São", "S.", RA),
+             RA = gsub("Recanto", "R.", RA),
+             RA = gsub("Núcleo Bandeirante", "N. Band.", RA),
+             RA = gsub("Lago", "L.", RA),
+             RA = gsub("Candangolândia", "Candang.", RA),
+             RA = gsub("Sudoeste/Octogonal", "Sud./Oct.", RA))
+    
+Mapa_R <- ggplot(inci_mapa) +
+      geom_sf(aes(fill = Inci)) +
+      #geom_sf_label(aes(label = RA), size = 1.8, label.padding = unit(0.6, "mm")) +
+      geom_sf_text_repel(aes(label = RA), size = 2, fontface='bold') +
+      scale_fill_distiller(palette = "Oranges", name="Incidência", limits = c(min(inci_mapa$Inci, na.rm = T), max(inci_mapa$Inci, na.rm = T)), direction = 1, guide = guide_colourbar(direction = "vertical", barwidth = 0.5, barheight = 3)) +
+      theme(legend.title = element_text(size = 10),
+            legend.text = element_text(size = 8)) +
+      theme(axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank()) +
+      theme_map() +
+      annotation_scale(location = "br") +
+      labs(caption = paste0("PAINEL COVID-19 de incidência de casos em ", j , " de ", i, ".", " Sujeitos à alteração após investigação epidemiológica."))
+    
+    #Salvando
+    ggsave(paste0("Casos ", "de ", j , " ", i, " .png"), width = 158, height = 93, units = "mm")
+    
+  }
+}
+```
+
+
+
+```{r, include=F}
+# Óbitos ------------------------------------------------------------------
+
+obitos <- painel %>% filter(!is.na(dataObt))
+
+painelData_obt <- as_tbl_time(obitos, index = dataObt) #transformando a data novamente
+painelObt <- painelData_obt[order(painelData_obt$dataObt),] #ordenando a data
+painelObt <- painelObt %>% mutate(mes_obt = format(dataObt, format="%B"))
+```
+
+
+```{r, include=F}
+# Mapa para óbitos de Covid-19 --------------------------------------------
+
+for (i in anos){
+  if (i == "2020"){
+    meses <- c("março", "abril", "maio", "junho", "julho", "agosto", "setembro",  "outubro", "novembro", "dezembro")
+    
+  }
+  if (i == "2021"){
+    meses <- c("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro",  "outubro", "novembro", "dezembro")
+  }
+  
+  for (j in meses){
+    
+    obitos20 <- filter_time(painelObt, ~ i)
+    obitos20 <- obitos20 %>% filter(mes_obt == j)
+
+    obitos <- obitos20 %>%
+      filter(!is.na(RA) | RA == "") %>%
+      mutate(RA = toupper(RA)) %>%
+      mutate(RA = ifelse(RA == "ARNIQUEIRA", "ÁGUAS CLARAS",
+                         ifelse(RA == "SOL NASCENTE", "CEILÂNDIA", RA)))%>%
+      group_by(RA) %>%
+      dplyr::summarize(Obitos=n())
+    
+    # Incidência de óbitos
+    
+    inci_obt <- left_join(obitos, tab_pop_ra2)%>%
+      mutate(Inci_obt = Obitos/pop*100000)
+    
+    inci_mapa_obt <- left_join(my_spdf, inci_obt)
+    
+    inci_mapa_obt$mid <- sf::st_centroid(inci_mapa_obt$geometry)
+    
+    inci_mapa_obt <- inci_mapa_obt %>%
+      mutate(RA = unlist(TC(RA)))%>%
+      mutate(RA = gsub("Águas", "A.", RA),
+             RA = gsub("Vicente", "V.", RA),
+             RA = gsub("Santa", "S.", RA),
+             RA = gsub("Riacho", "R.", RA),
+             RA = gsub("São", "S.", RA),
+             RA = gsub("Recanto", "R.", RA),
+             RA = gsub("Núcleo Bandeirante", "N. Band.", RA),
+             RA = gsub("Lago", "L.", RA),
+             RA = gsub("Candangolândia", "Candang.", RA),
+             RA = gsub("Sudoeste/Octogonal", "Sud./Oct.", RA))
+    
+Mapa_R <- ggplot(inci_mapa_obt) +
+      geom_sf(aes(fill = Inci_obt)) +
+      #geom_sf_label(aes(label = RA), size = 1.8, label.padding = unit(0.6, "mm")) +
+      geom_sf_text_repel(aes(label = RA), size = 2, fontface='bold') +
+      scale_fill_distiller(palette = "Oranges", name="Mortalidade", limits = c(min(inci_mapa_obt$Inci_obt, na.rm = T), max(inci_mapa_obt$Inci_obt, na.rm = T)), direction = 1, guide = guide_colourbar(direction = "vertical", barwidth = 0.5, barheight = 3)) +
+      theme(legend.title = element_text(size = 10),
+            legend.text = element_text(size = 8)) +
+      theme(axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank()) +
+      theme_map() +
+      annotation_scale(location = "br") +
+      labs(caption = paste0("PAINEL COVID-19 de mortalidade em ", j , " de ", i, ".", " Sujeitos à alteração após investigação epidemiológica."))
+
+  #Salvando
+  ggsave(paste0("Óbitos ", "de ", j , " ", i, " .png"), width = 158, height = 93, units = "mm")
+    
+  }
+}
+```
+
+
+
+Este pdf pode ser excluído! Foram criados 23 mapas de casos de Covid-19 desde fevereiro de 2020 até dezembro de 2021, assim como 22 mapas de óbitos por Covid no DF para cada RA do DF de março de 2020 até dezembro de 2021. Os mapas se encontram na pasta do script.
