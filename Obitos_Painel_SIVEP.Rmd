@@ -1,0 +1,227 @@
+---
+title: "Verificação de casos no Painel Covid-19 que são óbitos no SIVEP"
+author: "Centro de informações estratégicas em vigilância em saúde - CIEVS"
+date: "13/04/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+# Casos no painel e óbitos no SIVEP Gripe 
+
+# PACOTES -----------------------------------------------------------------
+
+rm(list=ls())
+gc()
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, lubridate, tibbletime, dplyr, data.table, epitools, sf, knitr, xlsx, openxlsx, read.dbc, DBI, odbc)
+```
+
+“Este pdf pode ser excluído! Foi gerado um arquivo em .xlsx com o nome 'SIVEP_Final' e a data de hoje.“
+
+```{r, include=FALSE}
+# BANCOS UTILIZADOS -------------------------------------------------------
+
+hoje <- Sys.Date()
+hoje <- format(hoje, "%d-%m-%Y")
+
+# Sivep
+dados <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/SIVEP 2022.xlsx")
+```
+
+
+```{r, include=FALSE}
+# Painel
+con <- dbConnect(odbc::odbc(), 
+                 Driver = "SQL Server", 
+                 server = '10.91.254.32',
+                 database='controle_corona',
+                 uid = 'user_Saude_02',
+                 pwd = 'ses@1974',
+                 encoding = "WINDOWS-1252")
+
+res <- dbSendQuery(con, 'SELECT id, nomecompletoPaciente, dataNascimentoFull, mae, classificacaoFinal, dataObito, ufObito, outrosObitos, Reinfecção FROM View_Completa_saude')
+dado <- dbFetch(res)
+painel<- as_tibble(dado)
+rm(dado)
+```
+
+
+```{r, include=FALSE}
+painel$ufObito[painel$ufObito==""] <- NA
+painel <- painel %>% mutate(outrosObitos = ifelse(outrosObitos == " " | outrosObitos == "" | outrosObitos == "  ", NA, outrosObitos))
+```
+
+
+```{r, include=FALSE}
+# Planilhas
+p1 <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/04-ABRIL/14/ÓBITOS_FINALIZADOS_COMITÊ.xlsx", sheet = 1)
+p2 <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/04-ABRIL/14/ÓBITOS_FINALIZADOS_COMITÊ.xlsx", sheet = 2)
+p3 <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/04-ABRIL/14/ÓBITOS_FINALIZADOS_COMITÊ.xlsx", sheet = 3)
+p4 <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/04-ABRIL/14/Planilha captação dos óbitos.xlsx", sheet = 1)
+p5 <- openxlsx::read.xlsx("//srv-fs/COVID_DIVEP/ÓBITOS/LAUDOS E SÍNTESES DIÁRIAS/2022/04-ABRIL/14/Planilha captação dos óbitos.xlsx", sheet = 2)
+```
+
+
+```{r, include=FALSE}
+# Análises ----------------------------------------------------------------
+
+# Classificação final = cura e ignorado
+painelcasos <- painel %>% filter(classificacaoFinal != "Óbito" | is.na(classificacaoFinal)) %>% filter(is.na(outrosObitos)) %>% filter(is.na(Reinfecção)|Reinfecção != "Provável") %>% filter(is.na(ufObito))
+names(painelcasos)[2] <- c("NM_PACIENT")
+
+# Formatando os nomes
+painelcasos <- painelcasos %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT = chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT),
+         NM_PACIENT = str_squish(NM_PACIENT))
+
+dados2 <- dados %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT = chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT),
+         NM_PACIENT = str_squish(NM_PACIENT))
+
+# Formatando as datas
+painelcasos$dataNascimentoFull <-  as.Date(painelcasos$dataNascimentoFull , "%Y-%m-%d")
+painelcasos$dataNascimentoFull <- format(painelcasos$dataNascimentoFull, "%d/%m/%Y")
+
+# Sivep filtros para óbitos
+dados2 <- dados %>% filter(CO_MUN_NOT == 530010 & CLASSI_FIN == 5 & CRITERIO == 1 & EVOLUCAO == 2)
+
+# Fazendo match
+dados2 <- dados2 %>% select(NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, CLASSI_FIN)
+painelcasos <- painelcasos %>% select(NM_PACIENT, dataNascimentoFull, mae, classificacaoFinal)
+
+casos_obitos <- merge(dados2, painelcasos, by = "NM_PACIENT")
+
+# Datas de nascimento iguais e diferentes
+casos_obitos <- casos_obitos %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull, "sim", "não"))
+
+# Separando datas de nascimento iguais e diferentes
+casos_obt_iguais <- casos_obitos %>% filter(data_nasc_iguais == "sim")
+casos_obt_dif <- casos_obitos %>% filter(data_nasc_iguais == "não")
+```
+
+
+```{r, include=FALSE}
+# Match com planilhas -----------------------------------------------------
+
+names(p1)[11] <- c("NM_PACIENT")
+names(p2)[11] <- c("NM_PACIENT")
+names(p3)[11] <- c("NM_PACIENT")
+names(p4)[11] <- c("NM_PACIENT")
+names(p5)[11] <- c("NM_PACIENT")
+
+# Ajustando os nomes
+p1<- p1 %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT =chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT))
+p2 <- p2 %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT =chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT))
+p3 <- p3 %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT =chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT))
+p4 <- p4 %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT =chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT))
+p5 <- p5 %>%
+  mutate(NM_PACIENT = toupper(NM_PACIENT),
+         NM_PACIENT = str_replace_all(NM_PACIENT, "[[:punct:]]", ""),
+         NM_PACIENT =chartr("ÁÂÉÈÀÔÎÍÃÕÓÚÇ", "AAEEAOIIAOOUC", NM_PACIENT))
+
+# Ajustando as datas dos óbitos e de nascimento para o formato correto
+p1$DATA.DO.ÓBITO <- as.numeric(p1$DATA.DO.ÓBITO)
+p1$DATA.DO.ÓBITO <-  as.Date(p1$DATA.DO.ÓBITO, origin = "1899-12-30")
+p1$DATA.DO.ÓBITO <- format(p1$DATA.DO.ÓBITO, "%d/%m/%Y")
+p1$DATA.DE.NASCIMENTO <- as.numeric(p1$DATA.DE.NASCIMENTO)
+p1$DATA.DE.NASCIMENTO <-  as.Date(p1$DATA.DE.NASCIMENTO, origin = "1899-12-30")
+p1$DATA.DE.NASCIMENTO <- format(p1$DATA.DE.NASCIMENTO, "%d/%m/%Y")
+
+p2$DATA.DO.ÓBITO <- as.numeric(p2$DATA.DO.ÓBITO)
+p2$DATA.DO.ÓBITO <-  as.Date(p2$DATA.DO.ÓBITO, origin = "1899-12-30")
+p2$DATA.DO.ÓBITO <- format(p2$DATA.DO.ÓBITO, "%d/%m/%Y")
+p2$DATA.DE.NASCIMENTO <- as.numeric(p2$DATA.DE.NASCIMENTO)
+p2$DATA.DE.NASCIMENTO <-  as.Date(p2$DATA.DE.NASCIMENTO, origin = "1899-12-30")
+p2$DATA.DE.NASCIMENTO <- format(p2$DATA.DE.NASCIMENTO, "%d/%m/%Y")
+
+p3$DATA.DO.ÓBITO <- as.numeric(p3$DATA.DO.ÓBITO)
+p3$DATA.DO.ÓBITO <-  as.Date(p3$DATA.DO.ÓBITO, origin = "1899-12-30")
+p3$DATA.DO.ÓBITO <- format(p3$DATA.DO.ÓBITO, "%d/%m/%Y")
+p3$DATA.DE.NASCIMENTO <- as.numeric(p3$DATA.DE.NASCIMENTO)
+p3$DATA.DE.NASCIMENTO <-  as.Date(p3$DATA.DE.NASCIMENTO, origin = "1899-12-30")
+p3$DATA.DE.NASCIMENTO <- format(p3$DATA.DE.NASCIMENTO, "%d/%m/%Y")
+
+p4$DATA.DO.ÓBITO <- as.numeric(p4$DATA.DO.ÓBITO)
+p4$DATA.DO.ÓBITO <-  as.Date(p4$DATA.DO.ÓBITO, origin = "1899-12-30")
+p4$DATA.DO.ÓBITO <- format(p4$DATA.DO.ÓBITO, "%d/%m/%Y")
+p4$DATA.DE.NASCIMENTO <- as.numeric(p4$DATA.DE.NASCIMENTO)
+p4$DATA.DE.NASCIMENTO <-  as.Date(p4$DATA.DE.NASCIMENTO, origin = "1899-12-30")
+p4$DATA.DE.NASCIMENTO <- format(p4$DATA.DE.NASCIMENTO, "%d/%m/%Y")
+
+p5$DATA.DO.ÓBITO <- as.numeric(p5$DATA.DO.ÓBITO)
+p5$DATA.DO.ÓBITO <-  as.Date(p5$DATA.DO.ÓBITO, origin = "1899-12-30")
+p5$DATA.DO.ÓBITO <- format(p5$DATA.DO.ÓBITO, "%d/%m/%Y")
+p5$DATA.DE.NASCIMENTO <- as.numeric(p5$DATA.DE.NASCIMENTO)
+p5$DATA.DE.NASCIMENTO <-  as.Date(p5$DATA.DE.NASCIMENTO, origin = "1899-12-30")
+p5$DATA.DE.NASCIMENTO <- format(p5$DATA.DE.NASCIMENTO, "%d/%m/%Y")
+```
+
+
+```{r, include=FALSE}
+# Fazendo merge com cada planilha utilizada e criando coluna de DATA.DE.NASCIMENTO iguais
+p1_final_painel <- merge(p1, casos_obitos, by = "NM_PACIENT")
+p1_final_painel <- p1_final_painel %>% select(NM_PACIENT, RECORD.ID.PAINEL, COMUNIC.PAINEL, COMUNIC.AT, DATA.DO.ÓBITO, NOTIFICAÇÃO.SIVEP, RESULTADO, DATA.DE.NASCIMENTO, NOME.DA.MÃE, ESTABELECIMENTO.DE.SAÚDE, NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, dataNascimentoFull, mae)
+p1_final_painel <- p1_final_painel %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull & DT_NASC == DATA.DE.NASCIMENTO & dataNascimentoFull == DATA.DE.NASCIMENTO, "sim", "não"))
+
+p2_comite <- merge(p2, casos_obitos, by = "NM_PACIENT")
+p2_comite <- p2_comite %>% select(NM_PACIENT, RECORD.ID, COMUNIC.PAINEL, COMUNIC.AT, DATA.DO.ÓBITO, NOTIFICAÇÃO.SIVEP, `RESULTADO.DO.COVID-19`, DATA.DE.NASCIMENTO, NOME.DA.MÃE, ESTABELECIMENTO.DE.SAÚDE, NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, dataNascimentoFull, mae)
+p2_comite <- p2_comite %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull & DT_NASC == DATA.DE.NASCIMENTO & dataNascimentoFull == DATA.DE.NASCIMENTO, "sim", "não"))
+
+p3_outras_causas <- merge(p3, casos_obitos, by = "NM_PACIENT")
+p3_outras_causas <- p3_outras_causas %>% select(NM_PACIENT, COMUNIC.PAINEL, COMUNIC.AT, DATA.DO.ÓBITO, NOTIFICAÇÃO.SIVEP, `RESULTADO.DO.COVID-19`, DATA.DE.NASCIMENTO, NOME.DA.MÃE, ESTABELECIMENTO.DE.SAÚDE, NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, dataNascimentoFull, mae)
+p3_outras_causas <- p3_outras_causas %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull & DT_NASC == DATA.DE.NASCIMENTO & dataNascimentoFull == DATA.DE.NASCIMENTO, "sim", "não"))
+
+p4_captacao <- merge(p4, casos_obitos, by = "NM_PACIENT")
+p4_captacao <- p4_captacao %>% select(NM_PACIENT, COMUNIC.PAINEL, COMUNIC.AT, DATA.DO.ÓBITO, NOTIFICAÇÃO.SIVEP, `RESULTADO.DO.COVID-19`, DATA.DE.NASCIMENTO, NOME.DA.MÃE, ESTABELECIMENTO.DE.SAÚDE, NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, dataNascimentoFull, mae)
+p4_captacao <- p4_captacao %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull & DT_NASC == DATA.DE.NASCIMENTO & dataNascimentoFull == DATA.DE.NASCIMENTO, "sim", "não"))
+
+p5_pend <- merge(p5, casos_obitos, by = "NM_PACIENT")
+p5_pend <- p5_pend %>% select(NM_PACIENT, RECORD.ID, COMUNIC.PAINEL, COMUNIC.AT, DATA.DO.ÓBITO, NOTIFICAÇÃO.SIVEP, `RESULTADO.DO.COVID-19`, DATA.DE.NASCIMENTO, NOME.DA.MÃE, ESTABELECIMENTO.DE.SAÚDE, NU_NOTIFIC, NM_PACIENT, DT_NASC, NM_MAE_PAC, ID_UNIDADE, DT_ENCERRA, dataNascimentoFull, mae)
+p5_pend <- p5_pend %>% mutate(data_nasc_iguais = ifelse(DT_NASC == dataNascimentoFull & DT_NASC == DATA.DE.NASCIMENTO & dataNascimentoFull == DATA.DE.NASCIMENTO, "sim", "não"))
+```
+
+
+```{r, include=FALSE}
+# Pegando os óbitos não registrados no painel -----------------------------
+t1 <- subset(casos_obitos, !(NM_PACIENT %in% p1_final_painel$NM_PACIENT))
+t2 <- subset(t1, !(NM_PACIENT %in% p2_comite$NM_PACIENT))
+t3 <- subset(t2, !(NM_PACIENT %in% p3_outras_causas$NM_PACIENT))
+t4 <- subset(t3, !(NM_PACIENT %in% p4_captacao$NM_PACIENT))
+t5 <- subset(t4, !(NM_PACIENT %in% p5_pend$NM_PACIENT))
+```
+
+
+```{r, include=FALSE}
+# Salvando os arquivos
+setwd("D:/OBITOS_PAINEL_SIVEP")
+write.xlsx2(as.data.frame(t5), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "ÓBÍTOS FINAL", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(casos_obt_iguais), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Óbitos iguais", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(casos_obt_dif), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Óbitos diferentes", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(p1_final_painel), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Final painel", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(p2_comite), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Comitê", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(p3_outras_causas), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Outras causas", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(p4_captacao), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Captação", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(p5_pend), paste0("SIVEP_Final_", hoje, ".xlsx"), sheetName = "Pendências", append=TRUE, row.names = F)
+```
+
