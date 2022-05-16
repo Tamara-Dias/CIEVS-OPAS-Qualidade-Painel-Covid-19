@@ -1,0 +1,111 @@
+---
+title: "Cruzamento Painel Covid-19 com SIM"
+author: "Centro de informações estratégicas em vigilância em saúde - CIEVS"
+output: html_document
+---
+---
+title: "Rotina Linkage Painel e SIM"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+# PACOTES -----------------------------------------------------------------
+
+rm(list=ls())
+gc()
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr,rio,stringr,lubridate, openxlsx, xlsx)
+```
+
+```{r, include=FALSE}
+# BANCOS UTILIZADOS -------------------------------------------------------
+
+hoje <- Sys.Date()
+hoje <- format(hoje, "%d-%m-%Y")
+setwd("C:/Users/Tamara Dias/OneDrive/Área de Trabalho/Cievs/Produto 6 - Linkage Painel e SIM")
+
+# SIM
+banco_SIM <- openxlsx::read.xlsx("DO2021_Id.xlsx")
+colnames(banco_SIM) <- gsub(",\\w*,\\d*","",colnames(banco_SIM))
+
+SIM <- banco_SIM%>%
+  mutate(nome_norm = stringi::stri_trans_general(toupper(NOME), "latin-ascii"))%>%
+  mutate(nome_norm = str_squish(str_trim(str_replace_all(nome_norm, "[[:punct:]]|[[:digit:]]", ""))), data_nascimento = dmy(DTNASC))
+
+SIM_Covid <- SIM%>%
+  filter(CAUSABAS == "B342")
+
+summary(dmy(SIM$DTOBITO)) #Intervalo dos registros do SIM
+
+# Painel ------------------------------------------------------------------
+Painel <- import("ULTIMO PAINEL DO DIA.csv", encoding = "Latin-1")
+summary(dmy(Painel$`Notificacao Obito`)) #Intervalo dos registros do Painel
+
+painel <- Painel%>%
+  mutate(nome_norm = stringi::stri_trans_general(toupper(nomecompletoPaciente), "latin-ascii"))%>%
+  mutate(nome_norm = str_squish(str_trim(str_replace_all(nome_norm, "[[:punct:]]|[[:digit:]]", ""))),
+         data_nascimento = dmy(dataNascimentoFull), 
+         cpf_norm = gsub(pattern = "[,]|-|[.]|;| |^0+",replacement = "",x = cpf,perl = T),
+         notif_obito = dmy(Painel$`Notificacao Obito`))%>%
+  filter(notif_obito >= "2021-01-01" & notif_obito <= "2021-03-29")
+
+summary(painel$notif_obito) #Intervalo dos registros do Painel igualados aos do SIM
+```
+
+```{r, include=FALSE}
+paste0(round(((nrow(SIM_Covid)/nrow(painel))*100),2), "%") #Porcentagem de óbitos registrados no SIM em relação ao Painel
+```
+
+```{r, include=FALSE}
+# Cruzamento para óbitos por Covid------------------------------
+x <- anti_join(painel, SIM_Covid,
+               by = c("nome_norm" = "nome_norm", "data_nascimento" =  "data_nascimento"))
+
+taxa_de_sucesso = paste0(round(((nrow(x)/nrow(SIM_Covid))*100),2), "%")
+
+Obitos_painel_SIM <- left_join(painel, SIM_Covid,
+               by = c("nome_norm" = "nome_norm", "data_nascimento" =  "data_nascimento"))
+
+table(nchar(Obitos_painel_SIM$mae)<1) # Verificação de nomes da mãe não prenchidos
+table(nchar(Obitos_painel_SIM$enderecoCompleto)<1) # Verificação de endereços não prenchidos
+table(nchar(Obitos_painel_SIM$dataObito)<1)
+table(nchar(Obitos_painel_SIM$racaCor)<1)
+table(nchar(Obitos_painel_SIM$profissao)<1)
+```
+
+```{r, include=FALSE}
+#Separando campos a serem completados com informação do SIM
+Y <- Obitos_painel_SIM%>%
+  dplyr::select(colnames(painel),NOMEMAE,RACACOR,DTNASC,ENDRES,DTOBITO,NUMSUS,OCUP,LINHAII)%>%
+  mutate(racaCor = coalesce(racaCor,RACACOR),
+         enderecoCompleto = coalesce(enderecoCompleto,ENDRES),
+         conf_dt_obito = dmy(dataObito) == dmy(DTOBITO),
+         conf_dt_nasc = dmy(dataNascimentoFull) == dmy(DTNASC),
+         profissao = coalesce(profissao,OCUP))
+
+table(Y$conf_dt_obito) # conferencia do número de registros com data de óbito equivalentes entre o SIM e o Painel
+table(Y$conf_dt_nasc) # conferencia do número de registros com data de nascimento equivalentes entre o SIM e o Painel
+
+A <- filter(Y,nchar(Y$racaCor)<1) # Investigação das linhas incompletas
+
+B <- filter(Y, conf_dt_obito == "FALSE")
+B <- B %>%
+  mutate(tempo_teste = as.period(interval(start = as.Date(as.character(B$dataObito),format = '%d/%m/%Y'), end = dmy(B$DTOBITO)))) #Verificação das discrepância entre as datas de óbito
+B <- B %>% mutate(DTOBITO = format(as.Date(DTOBITO, "%d%m%Y"), "%d/%m/%Y"))
+```
+
+```{r, include=FALSE}
+# Salvando
+#setwd("D:/QUALIDADE_PAINEL")
+write.xlsx2(as.data.frame(Y), paste0("Linkage_SIM_PAINEL_", hoje, ".xlsx"), sheetName = "Completude", append=TRUE, row.names = F)
+write.xlsx2(as.data.frame(B), paste0("Linkage_SIM_PAINEL_", hoje, ".xlsx"), sheetName = "Obitos diferentes", append=TRUE, row.names = F)
+```
+
+Este html pode ser deletado da pasta. Foi criado um arquivo no disco D, na pasta QUALIDADE_PAINEL, com informações faltantes no Painel que estão no SIM na data de hoje. As variiáveis são: nome da mãe, comorbidades, raça/cor, endereço, data de nascimento e data de óbito.
+
