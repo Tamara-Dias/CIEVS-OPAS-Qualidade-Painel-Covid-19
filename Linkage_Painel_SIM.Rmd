@@ -102,7 +102,7 @@ B <- B %>% mutate(DTOBITO = format(as.Date(DTOBITO, "%d%m%Y"), "%d/%m/%Y"))
 
 ```{r, include=FALSE}
 # Salvando
-#setwd("D:/QUALIDADE_PAINEL")
+setwd("D:/QUALIDADE_PAINEL")
 write.xlsx2(as.data.frame(Y), paste0("Linkage_SIM_PAINEL_", hoje, ".xlsx"), sheetName = "Completude", append=TRUE, row.names = F)
 write.xlsx2(as.data.frame(B), paste0("Linkage_SIM_PAINEL_", hoje, ".xlsx"), sheetName = "Obitos diferentes", append=TRUE, row.names = F)
 ```
